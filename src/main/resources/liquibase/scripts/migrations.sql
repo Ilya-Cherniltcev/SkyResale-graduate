@@ -1,4 +1,4 @@
-CREATE TABLE users
+CREATE TABLE if not exists users
 (
     id         serial       NOT NULL PRIMARY KEY,
     first_name varchar(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE users
 
 );
 
-CREATE TABLE images
+CREATE TABLE if not exists images
 (
     pk         serial       NOT NULL PRIMARY KEY,
     data       BYTEA,
@@ -19,7 +19,7 @@ CREATE TABLE images
     media_type varchar(255) NOT NULL
 
 );
-CREATE TABLE ads
+CREATE TABLE if not exists ads
 (
     pk          serial       NOT NULL PRIMARY KEY,
     price       integer      NOT NULL,
@@ -29,14 +29,13 @@ CREATE TABLE ads
     author_id   bigint       NOT NULL REFERENCES users (id) --Как вариант, ведь автор должен быть
 );
 
-CREATE TABLE comments --Или как-то ещё назвать
+CREATE TABLE if not exists comments --Или как-то ещё назвать
 (
     pk         serial    NOT NULL PRIMARY KEY,
     author_id  bigint    NOT NULL REFERENCES users (id),
     ads_pk     bigint    NOT NULL REFERENCES ads (pk),
     created_at timestamp NOT NULL,
     text       text      NOT NULL
-
 );
 
 

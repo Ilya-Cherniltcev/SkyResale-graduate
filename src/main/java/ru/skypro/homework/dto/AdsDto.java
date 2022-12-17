@@ -8,6 +8,5 @@ public class AdsDto {
     private String title;
     private String description;
     private long price;
-    private String pk; // this is comment to ads
     private byte[] image;
 }

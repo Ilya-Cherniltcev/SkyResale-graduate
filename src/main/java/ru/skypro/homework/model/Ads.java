@@ -20,7 +20,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @Table(name = "ads")
-public class Ads {
+public class    Ads {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ads_id")

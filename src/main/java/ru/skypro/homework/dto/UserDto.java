@@ -7,6 +7,6 @@ public class UserDto {
     private long userId; // * auto increasing *
     private String firstName;
     private String lastName;
-    private String phone;
+    private String phoneNumber;
     private String email;
 }

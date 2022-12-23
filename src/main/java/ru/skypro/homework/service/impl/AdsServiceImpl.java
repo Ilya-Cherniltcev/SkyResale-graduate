@@ -24,7 +24,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public String getAdsComments(String ad_pk) {
+    public String getAdsComments(long adsId) {
         return null;
     }
 
@@ -34,7 +34,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsDto deleteAdsComments(String ad_pk, long id) {
+    public AdsDto deleteAdsComments(long adsId, long id) {
         return null;
     }
 

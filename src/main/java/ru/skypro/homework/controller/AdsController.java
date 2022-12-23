@@ -136,8 +136,8 @@ public class AdsController {
     }
 
     /**
-     * get comment from ads
-     * Use method of service {@link AdsService#getAdsComments(String)}
+     * get comment from ads by id
+     * Use method of service {@link AdsService#getAdsComments(long)}
      *
      * @return String (comment)
      */
@@ -163,11 +163,10 @@ public class AdsController {
                     description = "Not Found"
             )
     })
-    @GetMapping("{ad_pk}/comment")
-    public ResponseEntity<String> getAdsComments(@PathVariable String ad_pk) {
-        return new ResponseEntity<>(adsService.getAdsComments(ad_pk), HttpStatus.OK);
+    @GetMapping("{adsId}/comment")
+    public ResponseEntity<String> getAdsComments(@PathVariable long adsId) {
+        return new ResponseEntity<>(adsService.getAdsComments(adsId), HttpStatus.OK);
     }
-
     /**
      * Create comment to ads
      * Use method of service {@link AdsService#createAdsComments(long, String)}
@@ -206,8 +205,8 @@ public class AdsController {
     }
 
     /**
-     * Delete comment from ads by adsId
-     * Use method of service {@link AdsService#deleteAdsComments(String, long)}
+     * Delete comment from ads by adsId and comment's id
+     * Use method of service {@link AdsService#deleteAdsComments(long, long)}
      *
      * @return ads
      */
@@ -233,9 +232,10 @@ public class AdsController {
                     description = "Forbidden"
             )
     })
-    @DeleteMapping("{ad_pk}/comment{id}")
-    public ResponseEntity<AdsDto> deleteAdsComment(@PathVariable String ad_pk, @PathVariable long id) {
-        return new ResponseEntity<>(adsService.deleteAdsComments(ad_pk, id), HttpStatus.OK);
+
+    @DeleteMapping("{adsId}/comment{id}")
+    public ResponseEntity<AdsDto> deleteAdsComment(@PathVariable long adsId, @PathVariable long id) {
+        return new ResponseEntity<>(adsService.deleteAdsComments(adsId, id), HttpStatus.OK);
     }
 
     /**

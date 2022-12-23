@@ -12,11 +12,11 @@ public interface AdsService {
 
     Collection<AdsDto>  getAdsMe();
 
-    String getAdsComments(String ad_pk);
+    String getAdsComments(long adsId);
 
     AdsDto createAdsComments(long id, String comment);
 
-    AdsDto deleteAdsComments(String ad_pk, long id);
+    AdsDto deleteAdsComments(long adsId, long id);
 
     AdsDto updateAdsComments(long id, String adsComment);
 

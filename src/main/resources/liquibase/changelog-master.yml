@@ -1,3 +1,5 @@
 databaseChangeLog:
+#  - include:
+#      file: liquibase/scripts/migrations.sql
   - include:
-      file: liquibase/scripts/migrations.sql
+      file: liquibase/scripts/migrations_v.2.sql

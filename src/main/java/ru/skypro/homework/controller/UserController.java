@@ -10,9 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
-import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.service.UserService;
 
 import java.util.Collection;
@@ -131,7 +131,7 @@ public class UserController {
 
     /**
      * Set password for user
-     * Use method of service {@link UserService#setPassword(String)}
+     * Use method of service {@link UserService#setPassword(NewPasswordDto)}
      *
      * @return user
      */
@@ -162,7 +162,7 @@ public class UserController {
             )
     })
     @PostMapping("/set_password")
-    public ResponseEntity<UserDto> setPassword(@RequestBody String newPassword) {
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto newPassword) {
         return new ResponseEntity<>(userService.setPassword(newPassword), HttpStatus.OK);
     }
 
@@ -195,7 +195,7 @@ public class UserController {
             )
     })
     @DeleteMapping("{id}")
-    public ResponseEntity<UserDto> deleteUser(@PathVariable long id) {
+    public ResponseEntity<User> deleteUser(@PathVariable long id) {
         return new ResponseEntity<>(userService.removeUser(id), HttpStatus.OK);
     }
 
@@ -228,7 +228,7 @@ public class UserController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
+    public ResponseEntity<User> getUser(@PathVariable long id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 

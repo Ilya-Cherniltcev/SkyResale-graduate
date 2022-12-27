@@ -23,7 +23,6 @@ public class AdsImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ads_image_id")
     private Long id;
-
     @Column(name = "file_path")
     private String filePath;
 
@@ -36,7 +35,7 @@ public class AdsImage {
     @Lob
     @Column(name = "image_preview")
     private byte[] image;
-
+//
     @ManyToOne
     @JoinColumn(name = "ads_id")
     private Ads adsId;

@@ -1,28 +1,33 @@
 package ru.skypro.homework.service;
 
+import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.model.Ads;
+import ru.skypro.homework.model.AdsImage;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface AdsService {
 
     Collection<AdsDto> getALLAds();
 
-    AdsDto createAds(AdsDto adsDto);
+    AdsDto createAds(CreateAdsDto adsDto, AdsImage image);
 
-    Collection<AdsDto>  getAdsMe();
+    Collection<AdsDto> getAdsMe();
 
-    String getAdsComments(long adsId);
+    List<AdsCommentDto> getAdsComments(long adsId);
 
-    AdsDto createAdsComments(long id, String comment);
+    AdsCommentDto createAdsComments(long id, AdsCommentDto adsCommentDto);
 
-    AdsDto deleteAdsComments(long adsId, long id);
+    AdsDto deleteAdsComments(String adsId, long id);
 
-    AdsDto updateAdsComments(long id, String adsComment);
+    AdsCommentDto updateAdsComments(String adPk, long id, AdsCommentDto adsCommentDto);
 
-    AdsDto removeAds(long id);
+    Ads removeAds(long id);
 
-    AdsDto getAds(long id);
+    Ads getAds(long id);
 
-    AdsDto updateAds(AdsDto adsDto);
+    AdsDto updateAds(long id, CreateAdsDto adsDto);
 }

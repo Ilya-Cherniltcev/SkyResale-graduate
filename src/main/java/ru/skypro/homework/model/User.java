@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 /**
  * Класс Пользователи
@@ -42,6 +43,12 @@ public class User {
 
     @Column(name = "role")
     private String role;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "regDate")
+    private OffsetDateTime regDate;
 
     @Override
     public boolean equals(Object o) {

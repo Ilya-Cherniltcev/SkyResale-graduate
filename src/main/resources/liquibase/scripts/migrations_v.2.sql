@@ -53,3 +53,9 @@ CREATE TABLE IF NOT EXISTS users_avatars
     media_type     VARCHAR(255) NOT NULL,
     avatar_preview oid          NOT NULL
 );
+
+-- changeset pecheneg:2
+ALTER TABLE users
+    ADD COLUMN city VARCHAR(50) NOT NULL default 'defaultCity';
+ALTER TABLE users
+    ADD COLUMN regDate TIMESTAMP NOT NULL default NOW();

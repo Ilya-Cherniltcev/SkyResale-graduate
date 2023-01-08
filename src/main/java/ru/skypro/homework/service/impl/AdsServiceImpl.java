@@ -43,7 +43,7 @@ public class AdsServiceImpl implements AdsService {
     public Collection<AdsDto> getALLAds() {
         List<Ads> allAds = adsRepository.findAll();
         if (allAds.isEmpty()) {
-            throw new NotFoundException("Ничего не найдено");
+            return toAdsDtoList(adsRepository.findAll());
         }
 
         return toAdsDtoList(allAds);

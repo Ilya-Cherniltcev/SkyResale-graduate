@@ -34,7 +34,7 @@ public class AdsImage {
 
     @Lob
     @Column(name = "image_preview")
-    private byte[] image;
+    private byte[] image_preview;
 //
     @ManyToOne
     @JoinColumn(name = "ads_id")

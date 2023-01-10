@@ -19,7 +19,8 @@ public interface AdsMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "adsComments", ignore = true)
-    Ads fromCreateAds(CreateAdsDto createAdsDto, User author, AdsImage image);
+//    Ads fromCreateAds(CreateAdsDto createAdsDto, User author, AdsImage image);
+    Ads fromCreateAds(CreateAdsDto createAdsDto, User author);
 
     default List<String> fromImageList(List<AdsImage> adsImages) {
         List<String> strings = new ArrayList<>();

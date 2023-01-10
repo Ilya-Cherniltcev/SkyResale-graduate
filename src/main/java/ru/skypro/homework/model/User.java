@@ -47,7 +47,7 @@ public class User {
     @Column(name = "city")
     private String city;
 
-    @Column(name = "regDate")
+    @Column(name = "reg_date")
     private OffsetDateTime regDate;
 
     @Override

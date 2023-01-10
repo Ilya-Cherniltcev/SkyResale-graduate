@@ -11,7 +11,7 @@ import java.util.List;
 public interface AdsRepository extends JpaRepository<Ads, Long> {
 //    @Override
 //    List<Ads> findAll();
-    Ads findAdsById ();
+    Ads findAdsById (Long id);
 
 
 }

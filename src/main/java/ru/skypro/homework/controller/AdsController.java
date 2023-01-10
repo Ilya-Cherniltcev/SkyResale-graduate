@@ -4,7 +4,6 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,8 +13,8 @@ import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.model.Ads;
-import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.impl.AdsServiceImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,10 +24,15 @@ import java.util.List;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class AdsController {
 
-    private final AdsService adsService;
+    private final AdsServiceImpl adsService;
+
+    public AdsController(AdsServiceImpl adsService) {
+        this.adsService = adsService;
+    }
+
 
     /**
      * get All ads from DataBase
@@ -66,7 +70,7 @@ public class AdsController {
 
     /**
      * Create new ads
-     * Use method of service {@link AdsService#createAds(CreateAdsDto, AdsImage)}
+     * Use method of service {@link AdsService#createAds(CreateAdsDto)}
      *
      * @return ads
      */
@@ -97,8 +101,8 @@ public class AdsController {
             )
     })
     @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto adsDto, AdsImage image) {
-        return new ResponseEntity<>(adsService.createAds(adsDto, image), HttpStatus.CREATED);
+    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto adsDto) {
+        return new ResponseEntity<>(adsService.createAds(adsDto), HttpStatus.CREATED);
     }
 
     /**

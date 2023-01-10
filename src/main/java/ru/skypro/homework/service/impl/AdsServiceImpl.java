@@ -17,7 +17,6 @@ import ru.skypro.homework.mapper.AdsCommentMapper;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
-import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdsCommentRepository;
 import ru.skypro.homework.repository.AdsRepository;
@@ -51,10 +50,11 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsDto createAds(CreateAdsDto ads, AdsImage image) {
+    public AdsDto createAds(CreateAdsDto ads) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
-        Ads newAds = adsMapper.fromCreateAds(ads, user, image);
+//        Ads newAds = adsMapper.fromCreateAds(ads, user, image);
+        Ads newAds = adsMapper.fromCreateAds(ads, user);
         Ads response = adsRepository.save(newAds);
 
         return adsMapper.toDto(response);
@@ -79,7 +79,8 @@ public class AdsServiceImpl implements AdsService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your ads!");
         }
 
-        Ads updatedAds = adsMapper.fromCreateAds(adsDto, user, ads.getImage());
+//        Ads updatedAds = adsMapper.fromCreateAds(adsDto, user, ads.getImage());
+        Ads updatedAds = adsMapper.fromCreateAds(adsDto, user);
         updatedAds.setAdsComments(List.copyOf(ads.getAdsComments()));
         updatedAds.setId(id);
         Ads saveAds = adsRepository.save(updatedAds);
@@ -92,7 +93,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public Ads removeAds(long id) {
-        Ads adsForRemove = adsRepository.findAdsById();
+        Ads adsForRemove = adsRepository.findAdsById(id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {

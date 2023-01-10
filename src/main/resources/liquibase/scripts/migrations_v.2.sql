@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users
     phone_number VARCHAR(18)         NOT NULL,
     email        VARCHAR(100) UNIQUE NOT NULL,
     password     VARCHAR(255)        NOT NULL,
-    role         VARCHAR(10)         NOT NULL
+    role         VARCHAR(10)    NOT NULL
         CONSTRAINT role_check CHECK ( role IN ('USER', 'ADMIN'))
 );
 
@@ -58,4 +58,9 @@ CREATE TABLE IF NOT EXISTS users_avatars
 ALTER TABLE users
     ADD COLUMN city VARCHAR(50) NOT NULL default 'defaultCity';
 ALTER TABLE users
-    ADD COLUMN regDate TIMESTAMP NOT NULL default NOW();
+    ADD COLUMN reg_date TIMESTAMP NOT NULL default NOW();
+
+-- changeset cherniltcev:3
+Insert INTO users
+(first_name, last_name, phone_number, email, password, role, city, reg_date)
+VALUES ('11', '234234', '768787', 'fdf@df', 'fffff', 'USER', 'eeee', '2023-01-10 22:15:49.000000');

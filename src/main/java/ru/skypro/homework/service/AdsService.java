@@ -4,7 +4,6 @@ import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.model.Ads;
-import ru.skypro.homework.model.AdsImage;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +12,7 @@ public interface AdsService {
 
     Collection<AdsDto> getALLAds();
 
-    AdsDto createAds(CreateAdsDto adsDto, AdsImage image);
+    AdsDto createAds(CreateAdsDto adsDto);
 
     Collection<AdsDto> getAdsMe();
 

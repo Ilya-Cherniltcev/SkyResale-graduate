@@ -44,6 +44,8 @@ public class User {
     private String role;
 
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

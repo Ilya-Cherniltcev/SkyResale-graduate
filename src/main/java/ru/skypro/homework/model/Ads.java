@@ -37,9 +37,11 @@ public class    Ads {
     private String description;
 
 
+
     @JoinColumn (name = "ads_image_id")
     @OneToOne (cascade = CascadeType.ALL)
     private AdsImage image;
+
 
     @Column(name = "ads_price")
     private Long price;

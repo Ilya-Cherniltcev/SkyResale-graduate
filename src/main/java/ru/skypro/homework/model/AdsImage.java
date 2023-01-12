@@ -34,7 +34,11 @@ public class AdsImage {
 
     @Lob
     @Column(name = "image_preview")
+
+
     private byte[] data;
+=======
+
 
     @Override
     public boolean equals(Object o) {

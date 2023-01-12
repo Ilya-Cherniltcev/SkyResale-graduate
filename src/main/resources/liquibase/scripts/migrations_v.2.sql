@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users
     phone_number VARCHAR(18)         NOT NULL,
     email        VARCHAR(100) UNIQUE NOT NULL,
     password     VARCHAR(255)        NOT NULL,
-    role         VARCHAR(10)         NOT NULL
+    role         VARCHAR(10)    NOT NULL
         CONSTRAINT role_check CHECK ( role IN ('USER', 'ADMIN'))
 );
 
@@ -55,4 +55,5 @@ CREATE TABLE IF NOT EXISTS users_avatars
     media_type     VARCHAR(255) NOT NULL,
     avatar_preview oid          NOT NULL
 );
+
 

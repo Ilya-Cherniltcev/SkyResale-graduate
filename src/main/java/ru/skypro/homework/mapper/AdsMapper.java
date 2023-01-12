@@ -16,6 +16,7 @@ public interface AdsMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "adsComments", ignore = true)
+
     @Mapping(target = "image", source = "adsImage")
     Ads createAds(CreateAdsDto createAdsDto, User author, AdsImage adsImage);
 
@@ -24,6 +25,7 @@ public interface AdsMapper {
     @Mapping(target = "title", source = "createAdsDto.title")
 //    @Mapping(target = "adsComments", ignore =true)
     Ads updAds(CreateAdsDto createAdsDto, Ads ads);
+
 
     default String getImageLink(AdsImage adsImage) {
         return "/ads/image/" + adsImage.getId();

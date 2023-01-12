@@ -21,7 +21,6 @@ import ru.skypro.homework.mapper.ImageMapper;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
-import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdsCommentRepository;
 import ru.skypro.homework.repository.AdsImageRepository;
@@ -59,6 +58,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
+
     public AdsDto createAds(CreateAdsDto ads, MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
@@ -67,6 +67,7 @@ public class AdsServiceImpl implements AdsService {
 
             adsImageRepository.save(adsImage);
             Ads newAds = adsMapper.createAds(ads, user, adsImage);
+
 
             Ads response = adsRepository.save(newAds);
 
@@ -98,6 +99,7 @@ public class AdsServiceImpl implements AdsService {
         }
 
         Ads updatedAds = adsMapper.updAds(adsDto, ads);
+
         updatedAds.setAdsComments(List.copyOf(ads.getAdsComments()));
 //        updatedAds.setId(id);
         log.info("The ad with id = {} was updated ", adsId);
@@ -107,8 +109,10 @@ public class AdsServiceImpl implements AdsService {
 
     @Transactional
     @Override
+
     public Ads removeAds(long adsId) {
         Ads adsForRemove = getAds(adsId);
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {

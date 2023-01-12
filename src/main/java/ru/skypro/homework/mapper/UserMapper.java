@@ -16,4 +16,5 @@ public interface UserMapper {
     default String setRole() {
         return "USER";
     }
+
 }

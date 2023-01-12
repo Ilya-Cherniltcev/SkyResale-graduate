@@ -13,7 +13,9 @@ public interface AdsService {
 
     Collection<AdsDto> getAllAds();
 
+
     AdsDto createAds(CreateAdsDto adsDto, MultipartFile file);
+
 
     Collection<AdsDto> getAdsMe();
 

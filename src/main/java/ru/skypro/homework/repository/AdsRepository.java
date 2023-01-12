@@ -4,13 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.skypro.homework.model.Ads;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AdsRepository extends JpaRepository<Ads, Long> {
-//    @Override
-//    List<Ads> findAll();
-    Ads findAdsById (Long id);
+    Optional<Ads> findAdsById (Long adsId);
 
 
 }

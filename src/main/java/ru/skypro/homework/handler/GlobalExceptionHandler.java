@@ -4,10 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.skypro.homework.exception.AdsImageNotFoundException;
-import ru.skypro.homework.exception.AdsNotFoundException;
-import ru.skypro.homework.exception.ExtensionIsNotCorrectException;
-import ru.skypro.homework.exception.UserNotFoundException;
+import ru.skypro.homework.exception.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,6 +19,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> adsNotFoundExceptionHandler(AdsNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Объявление не найдено");
+    }
+    @ExceptionHandler(AdsCommentNotFoundException.class)
+    public ResponseEntity<String> AdsCommentNotFoundExceptionHandler(AdsCommentNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Комментарий к объявлению не найден");
     }
 
     @ExceptionHandler(ExtensionIsNotCorrectException.class)

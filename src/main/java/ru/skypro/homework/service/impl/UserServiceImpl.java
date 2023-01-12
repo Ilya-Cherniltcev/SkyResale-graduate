@@ -30,8 +30,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User response = userRepository.save(userMapper.toUser(userDto));
-        return userMapper.toDto(response);
+        User newUser = userRepository.save(userMapper.toUser(userDto));
+        newUser.setRole("USER");
+        return userMapper.toDto(newUser);
     }
 
 
@@ -96,20 +97,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(long id) {
-        User user =
-                userRepository
-                        .findById(id)
-                        .orElseThrow((Supplier<RuntimeException>) () -> new NotFoundException("The user with id = " + id + " doesn't exist"));
-
-        return user;
+        return userRepository.findById(id)
+                .orElseThrow((Supplier<RuntimeException>) () -> new NotFoundException("The user with id = " + id + " doesn't exist"));
     }
 
     @Override
     public User getUser(String username) {
-        User user = userRepository
-                .findUserByEmailIgnoreCase(username)
+        return userRepository.findUserByEmailIgnoreCase(username)
                 .orElseThrow((Supplier<RuntimeException>) () -> new NotFoundException("The user with name = " + username + " doesn't exist"));
-        return user;
     }
 
     @Override

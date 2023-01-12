@@ -36,18 +36,15 @@ public class    Ads {
     @Column(name = "ads_description")
     private String description;
 
-//    @Column(name = "ads_image")
-//    @JoinColumn (name = "ads_image_id")
-//    @OneToOne (cascade = CascadeType.ALL)
-//    private String image;
+
+
+    @JoinColumn (name = "ads_image_id")
+    @OneToOne (cascade = CascadeType.ALL)
+    private AdsImage image;
+
 
     @Column(name = "ads_price")
     private Long price;
-
-    @OneToMany
-    @JsonIgnore
-    @ToString.Exclude
-    private Collection<AdsImage> adsImages;
 
     @OneToMany
     @JsonIgnore

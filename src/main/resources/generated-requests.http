@@ -93,6 +93,46 @@ Content-Type: application/json
 Authorization: Basic user password
 
 
+###
+POST http://localhost:8080/ads
+Content-Type: multipart/form-data boundary=spacer
+Authorization: Basic user@gmail.com password
 
+--spacer
+Content-Disposition: form-data; name="adsDto"
+Content-Type: application/json
 
+{
+  "description": "pinguin",
+  "price": 340,
+  "title": "selling"
+}
+
+--spacer
+Content-Disposition: form-data; name="file"
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+
+C:/Users/Кот/Downloads/09af8ba33b9b3e503c7c359540726f15.jpg
+
+###
+POST http://localhost:8080/ads
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Basic dXNlckBnbWFpbC5jb206cGFzc3dvcmQ=
+
+--WebAppBoundary
+Content-Disposition: form-data; name="adsDto"
+Content-Type: application/json
+
+{
+  "description": "pinguin",
+  "price": 340,
+  "title": "selling"
+}
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="09af8ba33b9b3e503c7c359540726f15.jpg"
+Content-Type: image/png
+
+< C:/Users/Кот/Downloads/09af8ba33b9b3e503c7c359540726f15.jpg
+--WebAppBoundary
 

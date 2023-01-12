@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS ads
     ads_title       VARCHAR(100) NOT NULL,
     ads_description TEXT,
     ads_price       BIGINT       NOT NULL,
-    ads_image       VARCHAR(255)
+    ads_image_id      VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS ads_image
 (
     ads_image_id  SERIAL PRIMARY KEY,
     ads_id        BIGINT REFERENCES ads (ads_id),
-    file_path     VARCHAR(255) NOT NULL,
+    file_path     VARCHAR(255) ,
     file_size     BIGINT       NOT NULL,
     media_type    VARCHAR(255),
     image_preview oid
@@ -50,12 +50,9 @@ CREATE TABLE IF NOT EXISTS users_avatars
 (
     avatar_id      SERIAL PRIMARY KEY,
     author_id      BIGINT REFERENCES users (user_id),
+    file_path     VARCHAR(255) ,
+    file_size     BIGINT       NOT NULL,
     media_type     VARCHAR(255) NOT NULL,
     avatar_preview oid          NOT NULL
 );
 
--- changeset pecheneg:2
-ALTER TABLE users
-    ADD COLUMN city VARCHAR(50) NOT NULL default 'defaultCity';
-ALTER TABLE users
-    ADD COLUMN regDate TIMESTAMP NOT NULL default NOW();

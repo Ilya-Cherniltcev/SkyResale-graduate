@@ -10,11 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.model.Ads;
-import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.service.AdsService;
 
 import java.util.Collection;
@@ -32,7 +32,7 @@ public class AdsController {
 
     /**
      * get All ads from DataBase
-     * Use method of service {@link AdsService#getALLAds()}
+     * Use method of service {@link AdsService#getAllAds()}
      *
      * @return collection of ads
      */
@@ -59,14 +59,14 @@ public class AdsController {
             )
     })
     @GetMapping
-    public ResponseEntity<Collection<AdsDto>> getALLAds() {
-        return new ResponseEntity<>(adsService.getALLAds(), HttpStatus.OK);
+    public ResponseEntity<Collection<AdsDto>> getAllAds() {
+        return new ResponseEntity<>(adsService.getAllAds(), HttpStatus.OK);
     }
 
 
     /**
      * Create new ads
-     * Use method of service {@link AdsService#createAds(CreateAdsDto, AdsImage)}
+     * Use method of service {@link AdsService#createAds(CreateAdsDto, MultipartFile)}
      *
      * @return ads
      */
@@ -74,10 +74,10 @@ public class AdsController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Create a new ads",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    content = {@Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
                             // schema = @Schema(implementation = .class)
-                    )
+                    )}
             ),
             @ApiResponse(
                     responseCode = "201",
@@ -96,9 +96,10 @@ public class AdsController {
                     description = "Not Found"
             )
     })
-    @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody CreateAdsDto adsDto, AdsImage image) {
-        return new ResponseEntity<>(adsService.createAds(adsDto, image), HttpStatus.CREATED);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "adsDto") CreateAdsDto adsDto,
+                                         @RequestParam(value = "file") MultipartFile file) {
+        return new ResponseEntity<>(adsService.createAds(adsDto, file), HttpStatus.CREATED);
     }
 
     /**
@@ -206,7 +207,7 @@ public class AdsController {
 
     /**
      * Delete comment from ads by adsId and comment's id
-     * Use method of service {@link AdsService#deleteAdsComments(String, long)}
+     * Use method of service {@link AdsService#deleteAdsComments(long, long)}
      *
      * @return ads
      */
@@ -234,13 +235,13 @@ public class AdsController {
     })
 
     @DeleteMapping("{adsId}/comment{id}")
-    public ResponseEntity<AdsDto> deleteAdsComment(@PathVariable String adsId, @PathVariable long id) {
-        return new ResponseEntity<>(adsService.deleteAdsComments(adsId, id), HttpStatus.OK);
+    public ResponseEntity<AdsCommentDto> deleteAdsComment(@PathVariable long adsId, @PathVariable long commentId) {
+        return new ResponseEntity<>(adsService.deleteAdsComments(adsId, commentId), HttpStatus.OK);
     }
 
     /**
      * Update ads comment
-     * Use method of service {@link AdsService#updateAdsComments(String, long, AdsCommentDto)}
+     * Use method of service {@link AdsService#updateAdsComments(long, long, AdsCommentDto)}
      *
      * @return ads
      */
@@ -267,11 +268,11 @@ public class AdsController {
             )
     })
     @PatchMapping("{adsId}/comment{id}/comment")
-    public ResponseEntity<AdsCommentDto> updateAdsComment(@PathVariable String adsId,
-                                                          @PathVariable long commId,
+    public ResponseEntity<AdsCommentDto> updateAdsComment(@PathVariable long adsId,
+                                                          @PathVariable long commentId,
                                                           @RequestBody AdsCommentDto adsComment
     ) {
-        return new ResponseEntity<>(adsService.updateAdsComments(adsId, commId, adsComment), HttpStatus.OK);
+        return new ResponseEntity<>(adsService.updateAdsComments(adsId, commentId, adsComment), HttpStatus.OK);
     }
 
     /**
@@ -375,5 +376,9 @@ public class AdsController {
         return new ResponseEntity<>(adsService.updateAds(id, adsDto), HttpStatus.OK);
     }
 
+    @GetMapping("/image/{id}")
+    public ResponseEntity<byte[]> getImage(@PathVariable long adsImageId) {
+        return new ResponseEntity<>(adsService.getImage(adsImageId), HttpStatus.OK);
+    }
 }
 

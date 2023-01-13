@@ -27,7 +27,7 @@ public class AdsComment {
 
     @ManyToOne
     @JoinColumn(name = "ads_id")
-    private Ads adsId;
+    private Ads ads;
 
     @ManyToOne
     @JoinColumn(name = "author_user_id")
@@ -44,7 +44,7 @@ public class AdsComment {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         AdsComment that = (AdsComment) o;
-        return adsId != null && Objects.equals(adsId, that.adsId);
+        return ads != null && Objects.equals(ads, that.ads);
     }
 
     @Override

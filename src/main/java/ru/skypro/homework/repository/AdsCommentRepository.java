@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface AdsCommentRepository extends JpaRepository<AdsComment,Long> {
-    List<AdsComment> findAdsCommentByAdsId (Ads ads);
+    List<AdsComment> findAdsCommentByAds (Ads ads);
 
     Optional<AdsComment> findAdsCommentById(Long commentId);
 }

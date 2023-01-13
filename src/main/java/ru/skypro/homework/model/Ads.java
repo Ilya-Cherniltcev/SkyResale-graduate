@@ -43,7 +43,7 @@ public class    Ads {
     @Column(name = "ads_price")
     private Long price;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "adsId")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "ads")
     @JsonIgnore
     @ToString.Exclude
     private Collection<AdsComment> adsComments;

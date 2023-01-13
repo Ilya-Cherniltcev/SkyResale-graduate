@@ -9,9 +9,10 @@ import ru.skypro.homework.model.AdsComment;
 @Mapper
 public interface AdsCommentMapper {
     @Mapping(target = "author", source = "adsComment.author.id")
-    @Mapping(target = "ads", source = "adsComment.adsId.id")
+    @Mapping(target = "ads", source = "adsComment.ads.id")
     AdsCommentDto toDto(AdsComment adsComment);
     @Mapping(target = "author.id", source = "author")
+    @Mapping(target = "ads.id", source = "ads")
     AdsComment toAdsComment(AdsCommentDto adsCommentDto);
     CreateAdsCommentDto createToDto(AdsComment adsComment);
     AdsComment createToAdsComment(CreateAdsCommentDto adsCommentDto);

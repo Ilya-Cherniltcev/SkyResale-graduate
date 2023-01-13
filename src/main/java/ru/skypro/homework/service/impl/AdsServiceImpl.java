@@ -115,6 +115,14 @@ public class AdsServiceImpl implements AdsService {
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Недоступно для удаления, это не ваше объявление");
         }
+        List<Long> listOfId = adsCommentRepository.findAdsCommentByAds(adsForRemove).stream()
+                .map(AdsComment::getId)
+                .collect(Collectors.toList());
+
+        for (Long aLong : listOfId) {
+            adsCommentRepository.deleteById(aLong);
+        }
+
         adsRepository.deleteById(adsId);
         return adsMapper.toDto(adsForRemove);
     }
@@ -129,7 +137,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public List<AdsCommentDto> getAdsComments(long adsId) {
-        return adsCommentRepository.findAdsCommentByAdsId(findAds(adsId)).stream()
+        return adsCommentRepository.findAdsCommentByAds(findAds(adsId)).stream()
                 .map(adsCommentMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -143,7 +151,7 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.getUser(principalUser.getUsername());
 
         comment.setAuthor(user);
-        comment.setAdsId(findAds(adsId));
+        comment.setAds(findAds(adsId));
         comment.setCreatedAt(OffsetDateTime.now());
         return adsCommentMapper.toDto(adsCommentRepository.save(comment));
     }
@@ -177,7 +185,7 @@ public class AdsServiceImpl implements AdsService {
         }
         AdsComment comm = adsCommentMapper.createToAdsComment(adsCommentDto);
         comm.setAuthor(user);
-        comm.setAdsId(findAds(adsId));
+        comm.setAds(findAds(adsId));
         comm.setId(commentId);
         comm.setCreatedAt(OffsetDateTime.now());
         return adsCommentMapper.toDto(adsCommentRepository.save(comm));
@@ -189,6 +197,7 @@ public class AdsServiceImpl implements AdsService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public byte[] getImage(Long adsImageId) {
         return adsImageRepository.findAdsImageById(adsImageId)
@@ -208,7 +217,7 @@ public class AdsServiceImpl implements AdsService {
 
     private AdsComment getCommentsIfPresent(long adsId, long commentId) {
         AdsComment adsComment = findAdsComment(commentId);
-        if (!adsComment.getAdsId().getId().equals(adsId)) {
+        if (!adsComment.getAds().getId().equals(adsId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Comment is not from this ads!");
         }
         return adsComment;

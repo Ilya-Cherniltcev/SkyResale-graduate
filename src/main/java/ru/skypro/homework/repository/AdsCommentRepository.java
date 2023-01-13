@@ -6,8 +6,11 @@ import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AdsCommentRepository extends JpaRepository<AdsComment,Long> {
     List<AdsComment> findAdsCommentByAdsId (Ads ads);
+
+    Optional<AdsComment> findAdsCommentById(Long commentId);
 }

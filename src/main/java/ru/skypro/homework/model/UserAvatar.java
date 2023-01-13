@@ -23,13 +23,18 @@ public class UserAvatar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "avatar_id")
     private Long avatarId;
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column(name = "file_size")
+    private Long filesize;
 
     @Column(name = "media_type")
     private String mediaType;
 
     @Lob
     @Column(name = "avatar_preview")
-    private byte[] preview;
+    private byte[] data;
 
     @OneToOne
     @JoinColumn(name = "author_id")

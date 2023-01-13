@@ -2,6 +2,7 @@ package ru.skypro.homework.dto;
 
 import lombok.Data;
 
+
 @Data
 public class UserDto {
     private long userId; // * auto increasing *
@@ -9,4 +10,7 @@ public class UserDto {
     private String lastName;
     private String phoneNumber;
     private String email;
+    private String password;
+
+
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.model.User;
@@ -28,7 +29,7 @@ public class UserController {
 
     /**
      * Create new user
-     * Use method of service {@link UserService#createUser(UserDto)}
+     * Use method of service {@link UserService#createUser(CreateUserDto)}
      *
      * @return user
      */
@@ -59,7 +60,7 @@ public class UserController {
             )
     })
     @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> addUser(@RequestBody CreateUserDto userDto) {
         return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
     }
 

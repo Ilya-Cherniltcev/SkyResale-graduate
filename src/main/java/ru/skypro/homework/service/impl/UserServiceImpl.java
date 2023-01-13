@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.User;
@@ -29,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDto createUser(UserDto userDto) {
+    public UserDto createUser(CreateUserDto userDto) {
         User newUser = userRepository.save(userMapper.toUser(userDto));
         newUser.setRole("USER");
         return userMapper.toDto(newUser);

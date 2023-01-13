@@ -13,14 +13,18 @@ import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsCommentDto;
 import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.exception.AdsCommentNotFoundException;
 import ru.skypro.homework.exception.AdsImageNotFoundException;
+import ru.skypro.homework.exception.AdsNotFoundException;
 import ru.skypro.homework.exception.SaveFileException;
 import ru.skypro.homework.mapper.AdsCommentMapper;
 import ru.skypro.homework.mapper.ImageMapper;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
+import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdsCommentRepository;
 import ru.skypro.homework.repository.AdsImageRepository;
@@ -52,13 +56,11 @@ public class AdsServiceImpl implements AdsService {
         if (allAds.isEmpty()) {
             throw new NotFoundException("Ничего не найдено");
         }
-
         return toAdsDtoList(allAds);
 
     }
 
     @Override
-
     public AdsDto createAds(CreateAdsDto ads, MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
@@ -67,7 +69,6 @@ public class AdsServiceImpl implements AdsService {
 
             adsImageRepository.save(adsImage);
             Ads newAds = adsMapper.createAds(ads, user, adsImage);
-
 
             Ads response = adsRepository.save(newAds);
 
@@ -83,14 +84,14 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.getUser(authentication.getName());
         return toAdsDtoList(
                 adsRepository.findAll().stream()
-                .filter(e -> e.getAuthor().equals(user))
-                .collect(Collectors.toList()));
+                        .filter(e -> e.getAuthor().equals(user))
+                        .collect(Collectors.toList()));
     }
 
     @Transactional
     @Override
     public AdsDto updateAds(long adsId, CreateAdsDto adsDto) {
-        Ads ads = getAds(adsId);
+        Ads ads = findAds(adsId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
@@ -100,8 +101,6 @@ public class AdsServiceImpl implements AdsService {
 
         Ads updatedAds = adsMapper.updAds(adsDto, ads);
 
-        updatedAds.setAdsComments(List.copyOf(ads.getAdsComments()));
-//        updatedAds.setId(id);
         log.info("The ad with id = {} was updated ", adsId);
         return adsMapper.toDto(adsRepository.save(updatedAds));
     }
@@ -109,60 +108,54 @@ public class AdsServiceImpl implements AdsService {
 
     @Transactional
     @Override
-
-    public Ads removeAds(long adsId) {
-        Ads adsForRemove = getAds(adsId);
-
+    public AdsDto removeAds(long adsId) {
+        Ads adsForRemove = findAds(adsId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Недоступно для удаления, это не ваше объявление");
         }
         adsRepository.deleteById(adsId);
-        return adsForRemove;
+        return adsMapper.toDto(adsForRemove);
     }
 
+    @Transactional
     @Override
-    public Ads getAds(long id) {
-        Ads ads = adsRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("The ad with id = {} does not exist", id);
-                    return new NotFoundException("Ad with id = " + id + " does not exist");
-                });
-        log.info("The ad with id = {} was found", id);
-
-        return ads;
-
+    public AdsDto getAdsById(long adsId) {
+        return adsMapper.toDto(findAds(adsId));
     }
 
 
+    @Transactional
     @Override
     public List<AdsCommentDto> getAdsComments(long adsId) {
-        return adsCommentRepository.findAdsCommentByAdsId(adsId).stream()
+        return adsCommentRepository.findAdsCommentByAdsId(findAds(adsId)).stream()
                 .map(adsCommentMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
-    public AdsCommentDto createAdsComments(long adsId, AdsCommentDto adsCommentDto) {
-        AdsComment comment = adsCommentMapper.toAdsComment(adsCommentDto);
+    public AdsCommentDto createAdsComments(long adsId, CreateAdsCommentDto adsCommentDto) {
+        AdsComment comment = adsCommentMapper.createToAdsComment(adsCommentDto);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principalUser = (UserDetails) authentication.getPrincipal();
         User user = userService.getUser(principalUser.getUsername());
 
         comment.setAuthor(user);
-        comment.setAdsId(adsRepository.findAdsById(adsId));
+        comment.setAdsId(findAds(adsId));
         comment.setCreatedAt(OffsetDateTime.now());
         return adsCommentMapper.toDto(adsCommentRepository.save(comment));
     }
 
+    @Transactional
     @Override
     public AdsCommentDto deleteAdsComments(long adsId, long commentId) {
-        AdsComment comment = getCommentsIfPresent(adsId,commentId);
+        AdsComment comment = getCommentsIfPresent(adsId, commentId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principalUser = (UserDetails) authentication.getPrincipal();
         User user = userService.getUser(principalUser.getUsername());
-        Ads ads = getAds(adsId);
+        Ads ads = findAds(adsId);
 
         if (!comment.getAuthor().equals(user) && !ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to delete. It's not your comment!");
@@ -171,39 +164,29 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(comment);
     }
 
+    @Transactional
     @Override
-    public AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto) {
-        Ads ads = getAds(adsId);
+    public AdsCommentDto updateAdsComments(long adsId, long commentId, CreateAdsCommentDto adsCommentDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principalUser = (UserDetails) authentication.getPrincipal();
         User user = userService.getUser(principalUser.getUsername());
-        AdsComment comment = getCommentsIfPresent(adsId, commentId);
+        AdsComment comment = findAdsComment(commentId);
 
         if (!comment.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your comment!");
         }
-        AdsComment comm = adsCommentMapper.toAdsComment(adsCommentDto);
+        AdsComment comm = adsCommentMapper.createToAdsComment(adsCommentDto);
         comm.setAuthor(user);
-        comm.setAdsId(ads);
+        comm.setAdsId(findAds(adsId));
         comm.setId(commentId);
         comm.setCreatedAt(OffsetDateTime.now());
-        adsCommentRepository.save(comm);
-        return adsCommentMapper.toDto(comm);
+        return adsCommentMapper.toDto(adsCommentRepository.save(comm));
     }
 
     private List<AdsDto> toAdsDtoList(List<Ads> ads) {
         return ads.stream()
                 .map(adsMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    private AdsComment getCommentsIfPresent(long adsId, long commentId) {
-        AdsComment adsComment= adsCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Комментарий с указанным идентификатором " + commentId + " does not exist"));
-        if (!adsComment.getAdsId().getId().equals(adsId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Comment is not from this ads!");
-        }
-        return adsComment;
     }
 
     @Override
@@ -213,5 +196,21 @@ public class AdsServiceImpl implements AdsService {
                 .orElseThrow(AdsImageNotFoundException::new);
     }
 
+    private Ads findAds(long adsId) {
+        return adsRepository.findAdsById(adsId)
+                .orElseThrow(AdsNotFoundException::new);
+    }
 
+    private AdsComment findAdsComment(long commentId) {
+        return adsCommentRepository.findAdsCommentById(commentId)
+                .orElseThrow(AdsCommentNotFoundException::new);
+    }
+
+    private AdsComment getCommentsIfPresent(long adsId, long commentId) {
+        AdsComment adsComment = findAdsComment(commentId);
+        if (!adsComment.getAdsId().getId().equals(adsId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Comment is not from this ads!");
+        }
+        return adsComment;
+    }
 }

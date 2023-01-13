@@ -33,7 +33,7 @@ Content-Type: application/json
 ###
 GET http://localhost:8080/ads/me
 Content-Type: application/json
-Authorization: Basic user password
+Authorization: Basic user@gmail.com password
 
 ###
 GET http://localhost:8080/users/me
@@ -54,14 +54,14 @@ Authorization: Basic user password
 }
 
 ###
-GET http://localhost:8080/users/1
+GET http://localhost:8080/users/3
 Content-Type: application/json
-Authorization: Basic user password
+Authorization: Basic user@gmail.com password
 
 ###
-GET http://localhost:8080/ads
+GET http://localhost:8080/ads/1
 Content-Type: application/json
-Authorization: Basic user password
+Authorization: Basic user@gmail.com password
 
 
 ###
@@ -90,7 +90,7 @@ Authorization: Basic user password
 ###
 GET http://localhost:8080/ads
 Content-Type: application/json
-Authorization: Basic user password
+Authorization: Basic user@gmail.com password
 
 
 ###

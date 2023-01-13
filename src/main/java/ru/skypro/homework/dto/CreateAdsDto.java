@@ -12,7 +12,7 @@ public class CreateAdsDto {
     private String description;
     @NotNull(message = "price must be not null")
     @Positive(message = "price must be positive")
-    private Integer price;
+    private Long price;
     @NotBlank(message = "title must be not blank")
     private String title;
 }

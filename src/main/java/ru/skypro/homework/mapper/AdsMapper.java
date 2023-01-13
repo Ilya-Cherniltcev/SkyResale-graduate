@@ -23,7 +23,8 @@ public interface AdsMapper {
     @Mapping(target = "description", source = "createAdsDto.description")
     @Mapping(target = "price", source = "createAdsDto.price")
     @Mapping(target = "title", source = "createAdsDto.title")
-    Ads updAds(CreateAdsDto createAdsDto,Ads ads);
+//    @Mapping(target = "adsComments", ignore =true)
+    Ads updAds(CreateAdsDto createAdsDto, Ads ads);
 
 
     default String getImageLink(AdsImage adsImage) {

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS ads
     ads_title       VARCHAR(100) NOT NULL,
     ads_description TEXT,
     ads_price       BIGINT       NOT NULL,
-    ads_image_id      VARCHAR(255)
+    ads_image_id    BIGINT       NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ads_image

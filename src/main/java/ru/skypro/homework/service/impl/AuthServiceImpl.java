@@ -32,7 +32,14 @@ public class AuthServiceImpl implements AuthService {
         String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
     }
-
+    /**
+     * Метод регистрации пользователя, принимающий
+     * @param registerReq данные пользователя
+     * @param role его роль
+     *             если пользователь уже существует, возвращает false,
+     *             если не существует, создаётся новый пользователь и
+     * @return возвращает true
+     */
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
         if (manager.userExists(registerReq.getUsername())) {

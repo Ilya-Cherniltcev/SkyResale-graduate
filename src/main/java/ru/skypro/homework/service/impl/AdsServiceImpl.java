@@ -41,8 +41,10 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Collection<AdsDto> getALLAds() {
+        log.info("Получить все объявления");
         List<Ads> allAds = adsRepository.findAll();
         if (allAds.isEmpty()) {
+            log.warn("Объявления не найдены");
             throw new NotFoundException("Ничего не найдено");
         }
 
@@ -52,16 +54,19 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsDto createAds(CreateAdsDto ads, AdsImage image) {
+        log.info("Добавление нового объявления");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         Ads newAds = adsMapper.fromCreateAds(ads, user, image);
         Ads response = adsRepository.save(newAds);
+        log.info("Объявление с идентификатором " + response.getId() + " сохранено");
 
         return adsMapper.toDto(response);
     }
 
     @Override
     public Collection<AdsDto> getAdsMe() {
+        log.info("Получить все объявления пользователя");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         List<Ads> list = adsRepository.findAll();
@@ -71,19 +76,19 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsDto updateAds(long id, CreateAdsDto adsDto) {
+        log.info("Внесение изменений в объявление с идентификатором ", id);
         Ads ads = getAds(id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if(!ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            log.warn("Unavailable to update. It's not your ads! ads author = {}, username = {}", ads.getAuthor().getEmail(), user.getEmail());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your ads!");
+            log.warn("Изменение невозможно. Это не Ваше объявление! ads author = {}, username = {}", ads.getAuthor().getEmail(), user.getEmail());            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your ads!");
         }
 
         Ads updatedAds = adsMapper.fromCreateAds(adsDto, user, ads.getImage());
         updatedAds.setAdsComments(List.copyOf(ads.getAdsComments()));
         updatedAds.setId(id);
         Ads saveAds = adsRepository.save(updatedAds);
-        log.info("The ad with id = {} was updated ", id);
+        log.info("Объявление с  id = {} было изменено ", id);
 
         return adsMapper.toDto(saveAds);
 
@@ -92,13 +97,16 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public Ads removeAds(long id) {
+        log.info("Удаление объявление с id = {}", id);
         Ads adsForRemove = adsRepository.findAdsById();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
+            log.warn("Невозможно удалить объявление. Это не Ваше объявление! ads author = {}, username = {}", adsForRemove.getAuthor().getEmail(), user.getEmail());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Недоступно для удаления, это не ваше объявление");
         }
         adsRepository.deleteById(id);
+        log.info("Объявление с  id = {} удалено", id);
         return  adsForRemove;
     }
 
@@ -109,13 +117,17 @@ public class AdsServiceImpl implements AdsService {
                     log.warn("The ad with id = {} does not exist", id);
                     return new NotFoundException("Ad with id = " + id + " does not exist");
                 });
-        log.info("The ad with id = {} was found", id);
+        log.info("Объявление с id = {} найдено", id);
 
         return ads;
 
     }
 
-
+    /**
+     * Метод вывода комментариев к объявлению, принимающий в параметры
+     * @param adsId идентификатор объявления и
+     * @return возвращающий список комментариев к найденному объявлению, либо null
+     */
     @Override
     public List<AdsCommentDto> getAdsComments(long adsId) {
         Ads ads = getAds(adsId);
@@ -126,8 +138,8 @@ public class AdsServiceImpl implements AdsService {
     }
     @Override
     public AdsCommentDto createAdsComments(long id, AdsCommentDto adsCommentDto) {
+        log.info("Добавление комментария к объявлению с идентификатором ={}", id);
         Ads ads = getAds(id);
-
         AdsComment comment = adsCommentMapper.toAdsComment (adsCommentDto);
         comment.setAdsId(ads);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -141,6 +153,14 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(savedComment);
     }
 
+    /**
+     * Метод удаления комментариея, принимающий в параметры
+     * @param adsId идентификатор объявления
+     * @param id и идентификатор комментария
+     *           Ищет объявление, проверяет, является ли удаляющий автором
+     *           или администратором, если нет, возвращает исключение, если всё соответствует
+     * @return осуществляется удаление и возвращается null
+     */
     @Override
     public AdsDto deleteAdsComments(String adsId, long id) {
         AdsComment comment = getCommentsIfPresent(adsId,id);
@@ -158,8 +178,18 @@ public class AdsServiceImpl implements AdsService {
 
     }
 
+    /**
+     * Метод изменения комментария, принимающий в параметры
+     * @param adPk идентификатор объявления
+     * @param id идентификатор комментария
+     * @param adsCommentDto информацию, подлежащую внесению
+     *                      Осуществляет проверки, является ли вносящий изменения
+     *                      автором или администратором. Если проверка проходит
+     * @return вносит изменения в комменатрий и возвращает его, если не пройдена провера, возвращает исключение
+     */
     @Override
     public AdsCommentDto updateAdsComments(String adPk, long id, AdsCommentDto adsCommentDto) {
+
         Long adPkLg = Long.parseLong(adPk);
         Ads ads = getAds(adPkLg);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -16,7 +16,6 @@ import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsCommentDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.impl.AdsServiceImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -69,7 +68,7 @@ public class AdsController {
     /**
      * Create new ads
 
-     * Use method of service {@link AdsService#createAds(CreateAdsDto, MultipartFile)}
+     * Use method of service {@link AdsService#createAds(CreateAdsDto, MultipartFile[])}
 
      *
      * @return ads
@@ -103,8 +102,8 @@ public class AdsController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> addAds(@RequestPart(value = "adsDto") CreateAdsDto adsDto,
-                                         @RequestParam(value = "file") MultipartFile file) {
-        return new ResponseEntity<>(adsService.createAds(adsDto, file), HttpStatus.CREATED);
+                                         @RequestParam(value = "files") MultipartFile[] files) {
+        return new ResponseEntity<>(adsService.createAds(adsDto, files), HttpStatus.CREATED);
     }
 
     /**

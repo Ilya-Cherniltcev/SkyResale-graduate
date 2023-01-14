@@ -28,6 +28,7 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,16 +51,22 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsDto createAds(CreateAdsDto ads, MultipartFile file) {
+    public AdsDto createAds(CreateAdsDto ads, MultipartFile[] files) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         try {
-            AdsImage adsImage = imageMapper.toAdsImage(file);
+            Ads newAds = adsRepository.save(adsMapper.createAds(ads, user));
 
-            adsImageRepository.save(adsImage);
-            Ads newAds = adsMapper.createAds(ads, user, adsImage);
-
-            Ads response = adsRepository.save(newAds);
+            List<AdsImage> adsImageList = new ArrayList<>();
+            for (MultipartFile file : files) {
+                AdsImage newAdsImage = imageMapper.toAdsImage(file);
+                newAdsImage.setAds(newAds);
+                adsImageRepository.save(newAdsImage);
+                adsImageList.add(newAdsImage);
+            }
+            Ads updAds = findAds(newAds.getId());
+            updAds.setImage(adsImageList);
+            Ads response = adsRepository.save(updAds);
 
             return adsMapper.toDto(response);
         } catch (IOException e) {
@@ -104,13 +111,8 @@ public class AdsServiceImpl implements AdsService {
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             throw new ItIsNotYourAdsException();
         }
-        List<Long> listOfId = adsCommentRepository.findAdsCommentByAds(adsForRemove).stream()
-                .map(AdsComment::getId)
-                .collect(Collectors.toList());
-
-        for (Long aLong : listOfId) {
-            adsCommentRepository.deleteById(aLong);
-        }
+        adsCommentRepository.deleteAdsCommentsByAds(adsForRemove);
+        adsImageRepository.deleteAdsImagesByAds(adsForRemove);
 
         adsRepository.deleteById(adsId);
         return adsMapper.toDto(adsForRemove);

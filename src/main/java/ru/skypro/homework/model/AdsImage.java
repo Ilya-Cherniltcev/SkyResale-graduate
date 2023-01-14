@@ -23,6 +23,9 @@ public class AdsImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ads_image_id")
     private Long id;
+    @ManyToOne
+    @JoinColumn(name = "ads_id")
+    private Ads ads;
     @Column(name = "file_path")
     private String filePath;
 

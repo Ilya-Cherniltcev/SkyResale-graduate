@@ -4,9 +4,10 @@ import lombok.Data;
 
 @Data
 public class AdsDto {
-    private long adsId; // * auto increasing *
+
+    private long author;
+    private long pk; // * auto increasing *
     private String title;
-    private String description;
     private long price;
-    private String image;
+    private String[]image;
 }

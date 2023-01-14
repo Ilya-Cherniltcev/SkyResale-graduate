@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS ads
     author_user_id  BIGINT REFERENCES users (user_id),
     ads_title       VARCHAR(100) NOT NULL,
     ads_description TEXT,
-    ads_price       BIGINT       NOT NULL,
-    ads_image_id    BIGINT       NOT NULL
+    ads_price       BIGINT       NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ads_image

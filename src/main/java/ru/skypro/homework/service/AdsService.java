@@ -13,7 +13,7 @@ public interface AdsService {
 
     Collection<AdsDto> getAllAds();
 
-    AdsDto createAds(CreateAdsDto adsDto, MultipartFile file);
+    AdsDto createAds(CreateAdsDto adsDto, MultipartFile[] files);
 
     AdsDto removeAds(long id);
 

@@ -37,6 +37,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Изображение для объявления не найдена");
     }
+    @ExceptionHandler(ItIsNotYourCommentException.class)
+    public ResponseEntity<String> itIsNotYourCommentExceptionHandler(ItIsNotYourCommentException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Нельзя редактировать чужой комментарий");
+    }
+    @ExceptionHandler(ItIsNotYourAdsException.class)
+    public ResponseEntity<String> itIsNotYourAdsExceptionHandler(ItIsNotYourAdsException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Нельзя редактировать чужое объявление");
+    }
+    @ExceptionHandler(CommentFromAnotherAdsException.class)
+    public ResponseEntity<String> commentFromAnotherAdsExceptionHandler(CommentFromAnotherAdsException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Комментарий от другого объявления");
+    }
+    @ExceptionHandler(PasswordException.class)
+    public ResponseEntity<String> passwordExceptionHandler(PasswordException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Проблема с паролем");
+    }
 
 
 }

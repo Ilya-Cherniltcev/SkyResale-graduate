@@ -2,23 +2,17 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-import org.webjars.NotFoundException;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsCommentDto;
 import ru.skypro.homework.dto.CreateAdsDto;
-import ru.skypro.homework.exception.AdsCommentNotFoundException;
-import ru.skypro.homework.exception.AdsImageNotFoundException;
-import ru.skypro.homework.exception.AdsNotFoundException;
-import ru.skypro.homework.exception.SaveFileException;
+import ru.skypro.homework.exception.*;
 import ru.skypro.homework.mapper.AdsCommentMapper;
 import ru.skypro.homework.mapper.ImageMapper;
 import ru.skypro.homework.mapper.AdsMapper;
@@ -52,12 +46,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Collection<AdsDto> getAllAds() {
-        List<Ads> allAds = adsRepository.findAll();
-        if (allAds.isEmpty()) {
-            throw new NotFoundException("Ничего не найдено");
-        }
-        return toAdsDtoList(allAds);
-
+        return toAdsDtoList(adsRepository.findAll());
     }
 
     @Override
@@ -96,7 +85,7 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.getUser(authentication.getName());
         if (!ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
             log.warn("Unavailable to update. It's not your ads! ads author = {}, username = {}", ads.getAuthor().getEmail(), user.getEmail());
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your ads!");
+            throw new ItIsNotYourAdsException();
         }
 
         Ads updatedAds = adsMapper.updAds(adsDto, ads);
@@ -113,7 +102,7 @@ public class AdsServiceImpl implements AdsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Недоступно для удаления, это не ваше объявление");
+            throw new ItIsNotYourAdsException();
         }
         List<Long> listOfId = adsCommentRepository.findAdsCommentByAds(adsForRemove).stream()
                 .map(AdsComment::getId)
@@ -166,7 +155,7 @@ public class AdsServiceImpl implements AdsService {
         Ads ads = findAds(adsId);
 
         if (!comment.getAuthor().equals(user) && !ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to delete. It's not your comment!");
+            throw new ItIsNotYourCommentException();
         }
         adsCommentRepository.deleteById(commentId);
         return adsCommentMapper.toDto(comment);
@@ -181,7 +170,7 @@ public class AdsServiceImpl implements AdsService {
         AdsComment comment = findAdsComment(commentId);
 
         if (!comment.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unavailable to update. It's not your comment!");
+            throw new ItIsNotYourCommentException();
         }
         AdsComment comm = adsCommentMapper.createToAdsComment(adsCommentDto);
         comm.setAuthor(user);
@@ -218,7 +207,7 @@ public class AdsServiceImpl implements AdsService {
     private AdsComment getCommentsIfPresent(long adsId, long commentId) {
         AdsComment adsComment = findAdsComment(commentId);
         if (!adsComment.getAds().getId().equals(adsId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Comment is not from this ads!");
+            throw new CommentFromAnotherAdsException();
         }
         return adsComment;
     }

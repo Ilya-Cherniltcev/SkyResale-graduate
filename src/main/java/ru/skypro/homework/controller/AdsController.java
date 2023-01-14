@@ -4,6 +4,7 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,14 +26,10 @@ import java.util.List;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class AdsController {
 
-    private final AdsServiceImpl adsService;
-
-    public AdsController(AdsServiceImpl adsService) {
-        this.adsService = adsService;
-    }
+    private final AdsService adsService;
 
 
     /**

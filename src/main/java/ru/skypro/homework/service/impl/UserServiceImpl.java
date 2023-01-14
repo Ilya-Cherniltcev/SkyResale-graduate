@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto) {
         try {
-            User user = getUser(userDto.getEmail());
+            User user = getUser(userDto.getLogin());
             if (userDto.getFirstName() != null) {
                 user.setFirstName(userDto.getFirstName());
             }
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
         String newPass = passwordEncoder.encode(newPassword.getNewPassword());
         user.setPassword(newPass);
         User response = userRepository.save(user);
-        log.info("The user with username = {} was updated ", response.getEmail());
+        log.info("The user with login = {} was updated ", response.getLogin());
 
         return newPassword;
 
@@ -99,8 +99,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(String username) {
-        return userRepository.findUserByEmailIgnoreCase(username)
+    public User getUser(String login) {
+        return userRepository.findUserByLoginIgnoreCase(login)
                 .orElseThrow(UserNotFoundException::new);
     }
 

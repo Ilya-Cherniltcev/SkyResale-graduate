@@ -7,7 +7,6 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.OffsetDateTime;
 import java.util.Objects;
 /**
  * Класс Пользователи
@@ -25,30 +24,27 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "last_name")
-    private String lastName;
-
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "login")
+    private String login;
 
     @Column(name = "password")
     @ToString.Exclude
     private String password;
 
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "role")
     private String role;
 
-    @Column(name = "city")
-    private String city;
 
-    @Column(name = "regDate")
-    private OffsetDateTime regDate;
+
 
     @Override
     public boolean equals(Object o) {

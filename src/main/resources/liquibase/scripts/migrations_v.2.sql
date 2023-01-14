@@ -21,15 +21,15 @@ CREATE TABLE IF NOT EXISTS ads
     ads_title       VARCHAR(100) NOT NULL,
     ads_description TEXT,
     ads_price       BIGINT       NOT NULL,
-    ads_image       VARCHAR(255)
+    ads_image_id    BIGINT       NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ads_image
 (
     ads_image_id  SERIAL PRIMARY KEY,
     ads_id        BIGINT REFERENCES ads (ads_id),
-    file_path     VARCHAR(255) NOT NULL,
-    file_size     BIGINT       NOT NULL,
+    file_path     VARCHAR(255),
+    file_size     BIGINT NOT NULL,
     media_type    VARCHAR(255),
     image_preview oid
 );
@@ -43,19 +43,43 @@ CREATE TABLE IF NOT EXISTS ads_comment
     comment_created_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX ads_comment_author_id ON ads_comment (author_user_id);
-CREATE INDEX ads_comment_ads_id ON ads_comment (ads_id);
+CREATE INDEX IF NOT EXISTS ads_comment_author_id ON ads_comment (author_user_id);
+CREATE INDEX  IF NOT EXISTS ads_comment_ads_id ON ads_comment (ads_id);
 
 CREATE TABLE IF NOT EXISTS users_avatars
 (
     avatar_id      SERIAL PRIMARY KEY,
     author_id      BIGINT REFERENCES users (user_id),
+    file_path      VARCHAR(255),
+    file_size      BIGINT       NOT NULL,
     media_type     VARCHAR(255) NOT NULL,
     avatar_preview oid          NOT NULL
 );
 
--- changeset pecheneg:2
-ALTER TABLE users
-    ADD COLUMN city VARCHAR(50) NOT NULL default 'defaultCity';
-ALTER TABLE users
-    ADD COLUMN regDate TIMESTAMP NOT NULL default NOW();
+-- changeset cherniltcev:2
+ALTER TABLE IF EXISTS users
+    RENAME COLUMN email TO login;
+
+ALTER TABLE IF EXISTS ads
+    ALTER COLUMN ads_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS users
+    ALTER COLUMN user_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS ads_comment
+    ALTER COLUMN ads_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS ads_comment
+    ALTER COLUMN comment_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS ads_image
+    ALTER COLUMN ads_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS ads_image
+    ALTER COLUMN ads_image_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS users_avatars
+    ALTER COLUMN author_id SET DATA TYPE BIGINT;
+
+ALTER TABLE IF EXISTS users_avatars
+    ALTER COLUMN avatar_id SET DATA TYPE BIGINT;

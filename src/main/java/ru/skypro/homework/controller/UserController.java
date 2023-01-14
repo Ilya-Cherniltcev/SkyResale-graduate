@@ -10,12 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.service.UserService;
 
-import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -28,7 +27,7 @@ public class UserController {
 
     /**
      * Create new user
-     * Use method of service {@link UserService#createUser(UserDto)}
+     * Use method of service {@link UserService#createUser(CreateUserDto)}
      *
      * @return user
      */
@@ -59,13 +58,13 @@ public class UserController {
             )
     })
     @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> addUser(@RequestBody CreateUserDto userDto) {
         return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
     }
 
     /**
      * get users
-     * Use method of service {@link UserService#getUsers()}
+     * Use method of service {@link UserService#getUserMe()}
      *
      * @return collection of users
      */
@@ -92,8 +91,8 @@ public class UserController {
             )
     })
     @GetMapping("/me")
-    public ResponseEntity<Collection<UserDto>> getUsers() {
-        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
+    public ResponseEntity<UserDto> getUserMe() {
+        return new ResponseEntity<>(userService.getUserMe(), HttpStatus.OK);
     }
 
     /**
@@ -195,7 +194,7 @@ public class UserController {
             )
     })
     @DeleteMapping("{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable long id) {
+    public ResponseEntity<UserDto> deleteUser(@PathVariable long id) {
         return new ResponseEntity<>(userService.removeUser(id), HttpStatus.OK);
     }
 
@@ -228,7 +227,7 @@ public class UserController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 

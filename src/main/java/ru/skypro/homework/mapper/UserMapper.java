@@ -11,7 +11,12 @@ public interface UserMapper {
 
     @Mapping(source = "id", target = "userId")
     UserDto toDto(User user);
-    User toUser (UserDto userDto);
+    @Mapping(target = "role", expression = "java(setRole())")
+//    @Mapping(target = "login", expression = "java(setLogin())")
+    User toUser (CreateUserDto userDto);
 
-    User toAds(UserDto userDto);
+    default String setRole() {
+        return "USER";
+    }
+
 }

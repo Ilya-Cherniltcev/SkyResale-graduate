@@ -12,14 +12,13 @@ import org.webjars.NotFoundException;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.exception.PasswordException;
+import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import java.util.Collection;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -38,11 +37,9 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Collection<UserDto> getUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
+    public UserDto getUserMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return userMapper.toDto(getUser(authentication.getName()));
     }
 
     @Override
@@ -75,7 +72,7 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = getUser(authentication.getName());
         if (!passwordEncoder.matches(newPassword.getCurrentPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new PasswordException();
         }
 
         String newPass = passwordEncoder.encode(newPassword.getNewPassword());
@@ -88,24 +85,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User removeUser(long id) {
-        User user = getUserById(id);
-        if (user != null) {
-            userRepository.delete(user);
-        }
-        return user;
+    public UserDto removeUser(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+        userRepository.delete(user);
+        return userMapper.toDto(user);
     }
 
     @Override
-    public User getUserById(long id) {
-        return userRepository.findById(id)
-                .orElseThrow((Supplier<RuntimeException>) () -> new NotFoundException("The user with id = " + id + " doesn't exist"));
+    public UserDto getUserById(long id) {
+        return userMapper.toDto(userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new));
     }
 
     @Override
     public User getUser(String username) {
         return userRepository.findUserByEmailIgnoreCase(username)
-                .orElseThrow((Supplier<RuntimeException>) () -> new NotFoundException("The user with name = " + username + " doesn't exist"));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     @Override

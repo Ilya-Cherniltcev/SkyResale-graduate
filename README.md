@@ -9,4 +9,6 @@ Command2 это Чернильцев Илья, Государев Андрей, 
 
 docker run --rm -p 3000:3000 skypro-frontend-diploma-image
 
+docker run --rm -p 3000:3000 adsclient:v16
+
 ***

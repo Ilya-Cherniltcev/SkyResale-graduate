@@ -1,6 +1,7 @@
 package ru.skypro.homework.mapper;
 
 import org.mapstruct.Mapper;
+import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.Mapping;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;

@@ -3,6 +3,7 @@ package ru.skypro.homework.service.impl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
-        if (manager.userExists(registerReq.getUsername())) {
+        if (manager.userExists(registerReq.getLogin())) {
             return false;
         }
+
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         manager.createUser(
-                User.withDefaultPasswordEncoder()
-                        .password(registerReq.getPassword())
-                        .username(registerReq.getUsername())
+                User.withUsername(registerReq.getLogin())
+                        .password(encoder.encode(registerReq.getPassword()))
                         .roles(role.name())
                         .build()
         );

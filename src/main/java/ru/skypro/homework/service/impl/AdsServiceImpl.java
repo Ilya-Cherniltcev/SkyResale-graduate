@@ -84,7 +84,7 @@ public class AdsServiceImpl implements AdsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUser(authentication.getName());
         if (!ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            log.warn("Unavailable to update. It's not your ads! ads author = {}, username = {}", ads.getAuthor().getEmail(), user.getEmail());
+            log.warn("Unavailable to update. It's not your ads! ads author = {}, login = {}", ads.getAuthor().getLogin(), user.getLogin());
             throw new ItIsNotYourAdsException();
         }
 

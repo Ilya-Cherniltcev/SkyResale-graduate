@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface AdsCommentRepository extends JpaRepository<AdsComment,Long> {
     List<AdsComment> findAdsCommentByAds (Ads ads);
 
+    void deleteAdsCommentsByAds(Ads ads);
     Optional<AdsComment> findAdsCommentById(Long commentId);
 }

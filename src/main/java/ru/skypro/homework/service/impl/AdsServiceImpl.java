@@ -2,20 +2,12 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsCommentDto;
-import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.*;
-import ru.skypro.homework.mapper.AdsCommentMapper;
-import ru.skypro.homework.mapper.ImageMapper;
-import ru.skypro.homework.mapper.AdsMapper;
+import ru.skypro.homework.mapper.*;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
 import ru.skypro.homework.model.AdsImage;
@@ -29,7 +21,6 @@ import ru.skypro.homework.service.UserService;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,18 +33,21 @@ public class AdsServiceImpl implements AdsService {
     private final AdsImageRepository adsImageRepository;
     private final AdsCommentRepository adsCommentRepository;
     private final AdsMapper adsMapper;
+    private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
+    private final ResponseWrapperCommentMapper responseWrapperAdsCommentMapper;
     private final ImageMapper imageMapper;
     private final AdsCommentMapper adsCommentMapper;
 
+    @Transactional
     @Override
-    public Collection<AdsDto> getAllAds() {
-        return toAdsDtoList(adsRepository.findAll());
+    public ResponseWrapperAdsDto getAllAds() {
+        List<AdsDto> adsDtoList = toAdsDtoList(adsRepository.findAll());
+        return responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
     @Override
     public AdsDto createAds(CreateAdsDto ads, MultipartFile[] files) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUser(authentication.getName());
+        User user = userService.getUserFromAuthentication();
         try {
             Ads newAds = adsRepository.save(adsMapper.createAds(ads, user));
 
@@ -74,26 +68,24 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
+    @Transactional
     @Override
-    public Collection<AdsDto> getAdsMe() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUser(authentication.getName());
-        return toAdsDtoList(
+    public ResponseWrapperAdsDto getAdsMe() {
+        User user = userService.getUserFromAuthentication();
+        List<AdsDto> adsDtoList = toAdsDtoList(
                 adsRepository.findAll().stream()
                         .filter(e -> e.getAuthor().equals(user))
                         .collect(Collectors.toList()));
+        return responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
     @Transactional
     @Override
     public AdsDto updateAds(long adsId, CreateAdsDto adsDto) {
+        testAdsDtoNeededFieldsIsNotNull(adsDto);
         Ads ads = findAds(adsId);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUser(authentication.getName());
-        if (!ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            log.warn("Unavailable to update. It's not your ads! ads author = {}, login = {}", ads.getAuthor().getLogin(), user.getLogin());
-            throw new ItIsNotYourAdsException();
-        }
+        User user = userService.getUserFromAuthentication();
+        testThisIsYourAdsOrYouAdmin(ads, user);
 
         Ads updatedAds = adsMapper.updAds(adsDto, ads);
 
@@ -106,11 +98,9 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public AdsDto removeAds(long adsId) {
         Ads adsForRemove = findAds(adsId);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUser(authentication.getName());
-        if (!adsForRemove.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ItIsNotYourAdsException();
-        }
+        User user = userService.getUserFromAuthentication();
+        testThisIsYourAdsOrYouAdmin(adsForRemove, user);
+
         adsCommentRepository.deleteAdsCommentsByAds(adsForRemove);
         adsImageRepository.deleteAdsImagesByAds(adsForRemove);
 
@@ -120,26 +110,25 @@ public class AdsServiceImpl implements AdsService {
 
     @Transactional
     @Override
-    public AdsDto getAdsById(long adsId) {
-        return adsMapper.toDto(findAds(adsId));
+    public FullAdsDto getFullAds(long adsId) {
+        return adsMapper.toFullAdsDto(findAds(adsId));
     }
 
 
     @Transactional
     @Override
-    public List<AdsCommentDto> getAdsComments(long adsId) {
-        return adsCommentRepository.findAdsCommentByAds(findAds(adsId)).stream()
+    public ResponseWrapperCommentDto getAdsComments(long adsId) {
+        List<AdsCommentDto> adsCommentDtoList = adsCommentRepository.findAdsCommentByAds(findAds(adsId)).stream()
                 .map(adsCommentMapper::toDto)
                 .collect(Collectors.toList());
+        return responseWrapperAdsCommentMapper.toResponseWrapperCommentDto(adsCommentDtoList.size(), adsCommentDtoList);
     }
 
     @Transactional
     @Override
-    public AdsCommentDto createAdsComments(long adsId, CreateAdsCommentDto adsCommentDto) {
-        AdsComment comment = adsCommentMapper.createToAdsComment(adsCommentDto);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails principalUser = (UserDetails) authentication.getPrincipal();
-        User user = userService.getUser(principalUser.getUsername());
+    public AdsCommentDto createAdsComments(long adsId, AdsCommentDto adsCommentDto) {
+        AdsComment comment = adsCommentMapper.toAdsComment(adsCommentDto);
+        User user = userService.getUserFromAuthentication();
 
         comment.setAuthor(user);
         comment.setAds(findAds(adsId));
@@ -147,34 +136,30 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(adsCommentRepository.save(comment));
     }
 
+    @Override
+    public AdsCommentDto getAdsComment(long adsId, long commentId) {
+        return adsCommentMapper.toDto(getCommentsIfPresent(adsId, commentId));
+    }
+
     @Transactional
     @Override
     public AdsCommentDto deleteAdsComments(long adsId, long commentId) {
         AdsComment comment = getCommentsIfPresent(adsId, commentId);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails principalUser = (UserDetails) authentication.getPrincipal();
-        User user = userService.getUser(principalUser.getUsername());
-        Ads ads = findAds(adsId);
-
-        if (!comment.getAuthor().equals(user) && !ads.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ItIsNotYourCommentException();
-        }
+        User user = userService.getUserFromAuthentication();
+        testThisIsYourCommentOrYouAdmin(comment, user);
         adsCommentRepository.deleteById(commentId);
         return adsCommentMapper.toDto(comment);
     }
 
     @Transactional
     @Override
-    public AdsCommentDto updateAdsComments(long adsId, long commentId, CreateAdsCommentDto adsCommentDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails principalUser = (UserDetails) authentication.getPrincipal();
-        User user = userService.getUser(principalUser.getUsername());
+    public AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto) {
+        testAdsCommentDtoTextIsNotNull(adsCommentDto);
+        User user = userService.getUserFromAuthentication();
         AdsComment comment = findAdsComment(commentId);
+        testThisIsYourCommentOrYouAdmin(comment, user);
 
-        if (!comment.getAuthor().equals(user) && !userService.isAdmin(authentication)) {
-            throw new ItIsNotYourCommentException();
-        }
-        AdsComment comm = adsCommentMapper.createToAdsComment(adsCommentDto);
+        AdsComment comm = adsCommentMapper.toAdsComment(adsCommentDto);
         comm.setAuthor(user);
         comm.setAds(findAds(adsId));
         comm.setId(commentId);
@@ -182,7 +167,8 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(adsCommentRepository.save(comm));
     }
 
-    private List<AdsDto> toAdsDtoList(List<Ads> ads) {
+    @Transactional
+    public List<AdsDto> toAdsDtoList(List<Ads> ads) {
         return ads.stream()
                 .map(adsMapper::toDto)
                 .collect(Collectors.toList());
@@ -212,5 +198,30 @@ public class AdsServiceImpl implements AdsService {
             throw new CommentFromAnotherAdsException();
         }
         return adsComment;
+    }
+
+    private void testAdsCommentDtoTextIsNotNull(AdsCommentDto adsCommentDto) {
+        if (adsCommentDto.getCommentText() == null) {
+            throw new NoContentException();
+        }
+    }
+
+    private void testAdsDtoNeededFieldsIsNotNull(CreateAdsDto adsDto) {
+        if (adsDto.getDescription() == null || adsDto.getPrice() == null || adsDto.getTitle() == null) {
+            throw new NoContentException();
+        }
+    }
+
+    private void testThisIsYourCommentOrYouAdmin(AdsComment comment, User user) {
+        if (!comment.getAuthor().equals(user) && !userService.isAdmin()) {
+            throw new ItIsNotYourCommentException();
+        }
+    }
+
+    private void testThisIsYourAdsOrYouAdmin(Ads ads, User user) {
+        if (!ads.getAuthor().equals(user) && !userService.isAdmin()) {
+            log.warn("Unavailable to update. It's not your ads! ads author = {}, login = {}", ads.getAuthor().getLogin(), user.getLogin());
+            throw new ItIsNotYourAdsException();
+        }
     }
 }

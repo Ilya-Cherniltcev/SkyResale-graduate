@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
@@ -95,6 +96,11 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserMe(), HttpStatus.OK);
     }
 
+
+    @PatchMapping(value = "me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updateUserImage(@RequestParam(value = "file")MultipartFile file) {
+        return new ResponseEntity<>(userService.updateUserImage(file), HttpStatus.OK);
+    }
     /**
      * Update user
      * Use method of service {@link UserService#updateUser(UserDto)}

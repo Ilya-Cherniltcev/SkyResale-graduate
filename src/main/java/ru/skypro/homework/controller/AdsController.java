@@ -261,7 +261,7 @@ public class AdsController {
                     description = "Not Found"
             )
     })
-    @GetMapping("{adsId}/comment")
+    @GetMapping("{adsId}/comments")
     public ResponseEntity<ResponseWrapperCommentDto> getAdsComments(@PathVariable long adsId) {
         return new ResponseEntity<>(adsService.getAdsComments(adsId), HttpStatus.OK);
     }
@@ -298,13 +298,13 @@ public class AdsController {
                     description = "Not Found"
             )
     })
-    @PostMapping("{adsId}/comment")
+    @PostMapping("{adsId}/comments")
     public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable long adsId,
                                                        @RequestBody AdsCommentDto adsCommentDto) {
         return new ResponseEntity<>(adsService.createAdsComments(adsId, adsCommentDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("{adsId}/comment/{commentId}")
+    @GetMapping("{adsId}/comments/{commentId}")
     public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable long adsId,
                                                        @PathVariable long commentId) {
         return new ResponseEntity<>(adsService.getAdsComment(adsId, commentId), HttpStatus.OK);
@@ -340,7 +340,7 @@ public class AdsController {
             )
     })
 
-    @DeleteMapping("{adsId}/comment/{commentId}")
+    @DeleteMapping("{adsId}/comments/{commentId}")
     public ResponseEntity<AdsCommentDto> deleteAdsComment(@PathVariable long adsId,
                                                           @PathVariable long commentId) {
         return new ResponseEntity<>(adsService.deleteAdsComments(adsId, commentId), HttpStatus.OK);
@@ -374,7 +374,7 @@ public class AdsController {
                     description = "Forbidden"
             )
     })
-    @PatchMapping("{adsId}/comment/{commentId}")
+    @PatchMapping("{adsId}/comments/{commentId}")
     public ResponseEntity<AdsCommentDto> updateAdsComment(@PathVariable long adsId,
                                                           @PathVariable long commentId,
                                                           @RequestBody AdsCommentDto adsCommentDto

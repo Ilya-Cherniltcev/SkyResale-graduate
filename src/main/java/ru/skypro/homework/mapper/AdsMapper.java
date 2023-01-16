@@ -39,10 +39,8 @@ public interface AdsMapper {
 
 @Transactional
     default String[] getImageLink(List<AdsImage> adsImages) {
-        String[] arrayLinks = new String[adsImages.size()];
-        for (int i = 0; i < adsImages.size(); i++) {
-            arrayLinks[i] = "/ads/image/" + adsImages.get(i).getId();
-        }
+        String[] arrayLinks = new String[1];
+            arrayLinks[0] = "/ads/image/" + adsImages.get(0).getId();
         return arrayLinks;
     }
 

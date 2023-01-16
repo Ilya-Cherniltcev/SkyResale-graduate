@@ -24,11 +24,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+    public boolean login(String username, String password) {
+        if (!manager.userExists(username)) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
+        UserDetails userDetails = manager.loadUserByUsername(username);
         String encryptedPassword = userDetails.getPassword();
         String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);

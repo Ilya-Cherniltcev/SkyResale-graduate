@@ -9,5 +9,5 @@ public class AdsDto {
     private long pk; // * auto increasing *
     private String title;
     private long price;
-    private String[]image;
+    private String[] image;
 }

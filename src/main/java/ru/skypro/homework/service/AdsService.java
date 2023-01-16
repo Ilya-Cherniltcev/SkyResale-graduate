@@ -1,34 +1,30 @@
 package ru.skypro.homework.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsCommentDto;
-import ru.skypro.homework.dto.CreateAdsDto;
-
-import java.util.Collection;
-import java.util.List;
+import ru.skypro.homework.dto.*;
 
 public interface AdsService {
 
-    Collection<AdsDto> getAllAds();
+    ResponseWrapperAdsDto getAllAds();
 
     AdsDto createAds(CreateAdsDto adsDto, MultipartFile[] files);
 
     AdsDto removeAds(long id);
 
-    AdsDto getAdsById(long adsId);
+    FullAdsDto getFullAds(long adsId);
 
     AdsDto updateAds(long id, CreateAdsDto adsDto);
 
-    Collection<AdsDto> getAdsMe();
+    ResponseWrapperAdsDto getAdsMe();
 
-    List<AdsCommentDto> getAdsComments(long adsId);
+    ResponseWrapperCommentDto getAdsComments(long adsId);
 
-    AdsCommentDto createAdsComments(long adsId, CreateAdsCommentDto adsCommentDto);
+    AdsCommentDto createAdsComments(long adsId, AdsCommentDto adsCommentDto);
+
+    AdsCommentDto getAdsComment(long adsId, long commentId);
 
     AdsCommentDto deleteAdsComments(long adsId, long commentId);
 
-    AdsCommentDto updateAdsComments(long adsId, long commentId, CreateAdsCommentDto adsCommentDto);
+    AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto);
     byte[] getImage(Long adsImageId);
 }

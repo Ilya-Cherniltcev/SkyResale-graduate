@@ -11,15 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsCommentDto;
-import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
-
-import java.util.Collection;
-import java.util.List;
-
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -60,16 +53,15 @@ public class AdsController {
             )
     })
     @GetMapping
-    public ResponseEntity<Collection<AdsDto>> getAllAds() {
+    public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         return new ResponseEntity<>(adsService.getAllAds(), HttpStatus.OK);
     }
 
 
     /**
      * Create new ads
-
+     * <p>
      * Use method of service {@link AdsService#createAds(CreateAdsDto, MultipartFile[])}
-
      *
      * @return ads
      */
@@ -141,7 +133,7 @@ public class AdsController {
 
     /**
      * get ads by id
-     * Use method of service {@link AdsService#getAdsById(long)}
+     * Use method of service {@link AdsService#getFullAds(long)}
      *
      * @return ads
      */
@@ -168,8 +160,8 @@ public class AdsController {
             )
     })
     @GetMapping("/{adsId}")
-    public ResponseEntity<AdsDto> getAds(@PathVariable long adsId) {
-        return new ResponseEntity<>(adsService.getAdsById(adsId), HttpStatus.OK);
+    public ResponseEntity<FullAdsDto> getFullAds(@PathVariable long adsId) {
+        return new ResponseEntity<>(adsService.getFullAds(adsId), HttpStatus.OK);
     }
 
     /**
@@ -236,10 +228,11 @@ public class AdsController {
             )
     })
     @GetMapping("/me")
-    public ResponseEntity<Collection<AdsDto>> getAdsMe() {
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe() {
         return new ResponseEntity<>(adsService.getAdsMe(), HttpStatus.OK);
     }
 //*****************************ADS_COMMENTS*********************************
+
     /**
      * get comment from ads by id
      * Use method of service {@link AdsService#getAdsComments(long)}
@@ -269,13 +262,13 @@ public class AdsController {
             )
     })
     @GetMapping("{adsId}/comment")
-    public ResponseEntity<List<AdsCommentDto>> getAdsComments(@PathVariable long adsId) {
+    public ResponseEntity<ResponseWrapperCommentDto> getAdsComments(@PathVariable long adsId) {
         return new ResponseEntity<>(adsService.getAdsComments(adsId), HttpStatus.OK);
     }
 
     /**
      * Create comment to ads
-     * Use method of service {@link AdsService#createAdsComments(long, CreateAdsCommentDto)} (long, AdsCommentDto)}
+     * Use method of service {@link AdsService#createAdsComments(long, AdsCommentDto)} (long, AdsCommentDto)}
      *
      * @return ads
      */
@@ -307,9 +300,16 @@ public class AdsController {
     })
     @PostMapping("{adsId}/comment")
     public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable long adsId,
-                                                       @RequestBody CreateAdsCommentDto adsComment) {
-        return new ResponseEntity<>(adsService.createAdsComments(adsId, adsComment), HttpStatus.CREATED);
+                                                       @RequestBody AdsCommentDto adsCommentDto) {
+        return new ResponseEntity<>(adsService.createAdsComments(adsId, adsCommentDto), HttpStatus.CREATED);
     }
+
+    @GetMapping("{adsId}/comment/{commentId}")
+    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable long adsId,
+                                                       @PathVariable long commentId) {
+        return new ResponseEntity<>(adsService.getAdsComment(adsId, commentId), HttpStatus.OK);
+    }
+
 
     /**
      * Delete comment from ads by adsId and comment's id
@@ -348,7 +348,7 @@ public class AdsController {
 
     /**
      * Update ads comment
-     * Use method of service {@link AdsService#updateAdsComments(long, long, CreateAdsCommentDto)}
+     * Use method of service {@link AdsService#updateAdsComments(long, long, AdsCommentDto)}
      *
      * @return ads
      */
@@ -377,16 +377,16 @@ public class AdsController {
     @PatchMapping("{adsId}/comment/{commentId}")
     public ResponseEntity<AdsCommentDto> updateAdsComment(@PathVariable long adsId,
                                                           @PathVariable long commentId,
-                                                          @RequestBody CreateAdsCommentDto adsComment
+                                                          @RequestBody AdsCommentDto adsCommentDto
     ) {
-        return new ResponseEntity<>(adsService.updateAdsComments(adsId, commentId, adsComment), HttpStatus.OK);
+        return new ResponseEntity<>(adsService.updateAdsComments(adsId, commentId, adsCommentDto), HttpStatus.OK);
     }
-
 
 
     @GetMapping("/image/{adsImageId}")
     public ResponseEntity<byte[]> getImage(@PathVariable long adsImageId) {
         return new ResponseEntity<>(adsService.getImage(adsImageId), HttpStatus.OK);
     }
+
 }
 

@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
                 .body("Объявление не найдено");
     }
     @ExceptionHandler(AdsCommentNotFoundException.class)
-    public ResponseEntity<String> AdsCommentNotFoundExceptionHandler(AdsCommentNotFoundException e) {
+    public ResponseEntity<String> adsCommentNotFoundExceptionHandler(AdsCommentNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Комментарий к объявлению не найден");
     }
@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> adsImageNotFoundExceptionHandler(AdsImageNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Изображение для объявления не найдена");
+    }
+    @ExceptionHandler(UserAvatarNotFoundException.class)
+    public ResponseEntity<String> userAvatarNotFoundExceptionHandler(UserAvatarNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Аватар не найден");
     }
     @ExceptionHandler(ItIsNotYourCommentException.class)
     public ResponseEntity<String> itIsNotYourCommentExceptionHandler(ItIsNotYourCommentException e) {
@@ -56,6 +61,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> passwordExceptionHandler(PasswordException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Проблема с паролем");
+    }
+    @ExceptionHandler(SaveFileException.class)
+    public ResponseEntity<String> saveFileExceptionHandler(SaveFileException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Проблема о время сохранения файла");
+    }
+    @ExceptionHandler(ReadFileException.class)
+    public ResponseEntity<String> readFileExceptionHandler(ReadFileException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Проблема о время чтения файла");
+    }
+    @ExceptionHandler(NoContentException.class)
+    public ResponseEntity<String> noContentExceptionHandler(NoContentException e) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body("Нет необходимых данных");
     }
 
 

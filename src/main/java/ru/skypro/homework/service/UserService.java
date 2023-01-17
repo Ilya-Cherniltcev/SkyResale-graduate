@@ -1,6 +1,6 @@
 package ru.skypro.homework.service;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
@@ -13,6 +13,8 @@ public interface UserService {
 
     UserDto updateUser(UserDto userDto);
 
+    String updateUserImage(MultipartFile file);
+
     NewPasswordDto setPassword(NewPasswordDto newPassword);
 
     UserDto removeUser(long id);
@@ -20,5 +22,10 @@ public interface UserService {
     UserDto getUserById(long id);
 
     User getUser (String username);
-    boolean isAdmin(Authentication authentication);
-    }
+    boolean isAdmin();
+    User getUserFromAuthentication();
+
+    void uploadAvatar(MultipartFile file);
+
+    byte[] downloadAvatar();
+}

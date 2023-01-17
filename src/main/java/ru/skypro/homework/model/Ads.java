@@ -9,6 +9,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,9 +37,9 @@ public class    Ads {
     @Column(name = "ads_description")
     private String description;
 
-    @JoinColumn (name = "ads_image_id")
-    @OneToOne (cascade = CascadeType.ALL)
-    private AdsImage image;
+    @OneToMany (fetch = FetchType.LAZY, mappedBy = "ads")
+    @JsonIgnore
+    private List<AdsImage> image;
 
     @Column(name = "ads_price")
     private Long price;

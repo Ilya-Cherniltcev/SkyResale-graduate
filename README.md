@@ -7,8 +7,7 @@ Command2 это Чернильцев Илья, Государев Андрей, 
 ***
 ## Запуск фронта через докер ##
 
-docker run --rm -p 3000:3000 skypro-frontend-diploma-image
-
 docker run --rm -p 3000:3000 adsclient:v16
 
 ***
+But I ~~can't~~ see you every night

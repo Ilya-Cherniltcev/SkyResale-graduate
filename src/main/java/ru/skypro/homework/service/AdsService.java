@@ -13,7 +13,8 @@ public interface AdsService {
 
     FullAdsDto getFullAds(long adsId);
 
-    AdsDto updateAds(long id, CreateAdsDto adsDto);
+    AdsDto updateAds(long adsId, CreateAdsDto adsDto);
+    AdsDto updateAdsImage(long adsId, MultipartFile file);
 
     ResponseWrapperAdsDto getAdsMe();
 

@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
@@ -25,43 +24,6 @@ import ru.skypro.homework.service.UserService;
 public class UserController {
 
     private final UserService userService;
-
-    /**
-     * Create new user
-     * Use method of service {@link UserService#createUser(CreateUserDto)}
-     *
-     * @return user
-     */
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Create a new user",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                            // schema = @Schema(implementation = .class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Created"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Not Found"
-            )
-    })
-    @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody CreateUserDto userDto) {
-        return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
-    }
 
     /**
      * get users
@@ -98,9 +60,10 @@ public class UserController {
 
 
     @PatchMapping(value = "me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> updateUserImage(@RequestParam(value = "file")MultipartFile file) {
+    public ResponseEntity<UserDto> updateUserImage(@RequestParam(value = "image") MultipartFile file) {
         return new ResponseEntity<>(userService.updateUserImage(file), HttpStatus.OK);
     }
+
     /**
      * Update user
      * Use method of service {@link UserService#updateUser(UserDto)}
@@ -171,71 +134,11 @@ public class UserController {
         return new ResponseEntity<>(userService.setPassword(newPassword), HttpStatus.OK);
     }
 
-    /**
-     * Delete user by id
-     * Use method of service {@link UserService#removeUser(long)} 
-     *
-     * @return user
-     */
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "User was deleted",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                            // schema = @Schema(implementation = .class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "No content"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            )
-    })
-    @DeleteMapping("{id}")
-    public ResponseEntity<UserDto> deleteUser(@PathVariable long id) {
-        return new ResponseEntity<>(userService.removeUser(id), HttpStatus.OK);
+    @GetMapping("/image/{avatarId}")
+    public ResponseEntity<byte[]> getImage(@PathVariable long avatarId) {
+        return new ResponseEntity<>(userService.getAvatar(avatarId), HttpStatus.OK);
     }
 
-    /**
-     * get user by id
-     * Use method of service {@link UserService#getUserById(long)} 
-     *
-     * @return user
-     */
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "User was gotten",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                            // schema = @Schema(implementation = .class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Not Found"
-            )
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
-        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
-    }
 
 }
 

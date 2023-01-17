@@ -6,13 +6,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.CreateUserDto;
-import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.*;
+import ru.skypro.homework.mapper.ImageMapper;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.model.UserAvatar;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 
 @Slf4j
@@ -34,18 +36,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserAvatarRepository userAvatarRepository;
     private final UserMapper userMapper;
+    private final ImageMapper imageMapper;
 
     @Value("userImage")
     private String userImageDir;
 
     @Override
-    public UserDto createUser(CreateUserDto userDto) {
-        User newUser = userRepository.save(userMapper.toUser(userDto));
-        newUser.setRole("USER");
+    public UserDto createUser(RegisterReq registerReq) {
+        User newUser = userRepository.save(userMapper.toUser(registerReq));
         return userMapper.toDto(newUser);
     }
 
-
+    @Transactional
     @Override
     public UserDto getUserMe() {
         return userMapper.toDto(getUserFromAuthentication());
@@ -63,25 +65,41 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(response);
     }
 
+    @Transactional
     @Override
-    public String updateUserImage(MultipartFile file) {
-        return null;
+    public UserDto updateUserImage(MultipartFile file) {
+        User user = getUserFromAuthentication();
+        if (userAvatarRepository.findUserAvatarByUser(user).isPresent()) {
+            userAvatarRepository.deleteUserAvatarByUser(user);
+        }
+        try {
+            UserAvatar newUserAvatar = imageMapper.toUserAvatar(file);
+            newUserAvatar.setUser(user);
+            userAvatarRepository.save(newUserAvatar);
+        } catch (IOException e) {
+            throw new SaveFileException();
+        }
+        return userMapper.toDto(user);
     }
 
+    @Transactional
     @Override
-    public NewPasswordDto setPassword(NewPasswordDto newPassword) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public NewPasswordDto setPassword(NewPasswordDto newPasswordDto) {
+        if (newPasswordDto.getCurrentPassword().equals(newPasswordDto.getNewPassword())) {
+            throw new PasswordsAreEqualsException();
+        }
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         User user = getUserFromAuthentication();
-        if (!passwordEncoder.matches(newPassword.getCurrentPassword(), user.getPassword())) {
-            throw new PasswordException();
+        if (!encoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {
+            throw new PasswordsAreNotEqualsException();
         }
 
-        String newPass = passwordEncoder.encode(newPassword.getNewPassword());
+        String newPass = encoder.encode(newPasswordDto.getNewPassword());
         user.setPassword(newPass);
         User response = userRepository.save(user);
         log.info("The user with login = {} was updated ", response.getLogin());
 
-        return newPassword;
+        return newPasswordDto;
 
     }
 
@@ -99,11 +117,28 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserNotFoundException::new));
     }
 
+    @Transactional
     @Override
     public User getUser(String login) {
         return userRepository.findUserByLoginIgnoreCase(login)
                 .orElseThrow(UserNotFoundException::new);
     }
+
+    @Transactional
+    @Override
+    public boolean testUserForRegisterOk(String login) {
+        if (userRepository.findUserByLoginIgnoreCase(login).isPresent()) {
+            throw new LoginAlreadyUsedException();
+        }
+        return true;
+    }
+
+    @Transactional
+    @Override
+    public Optional<User> userExists(String login) {
+        return userRepository.findUserByLoginIgnoreCase(login);
+    }
+
 
     @Override
     public boolean isAdmin() {
@@ -112,6 +147,7 @@ public class UserServiceImpl implements UserService {
                 && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
     }
 
+    @Transactional
     @Override
     public User getUserFromAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -150,6 +186,15 @@ public class UserServiceImpl implements UserService {
             throw new ReadFileException();
         }
     }
+
+    @Transactional
+    @Override
+    public byte[] getAvatar(Long avatarId) {
+        return userAvatarRepository.findUserAvatarByAvatarId(avatarId)
+                .map(UserAvatar::getData)
+                .orElseThrow(UserAvatarNotFoundException::new);
+    }
+
 
     private String getExtension(String originalFileName) {
         String extension = StringUtils.substringAfter(originalFileName, ".");

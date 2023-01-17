@@ -1,37 +1,35 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.service.UserService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
     private final UserDetailsManager manager;
-
+    private final UserService userService;
     private final PasswordEncoder encoder;
 
-    public AuthServiceImpl(UserDetailsManager manager) {
+    public AuthServiceImpl(UserDetailsManager manager, UserService userService) {
         this.manager = manager;
+        this.userService = userService;
         this.encoder = new BCryptPasswordEncoder();
     }
 
     @Override
-    public boolean login(String username, String password) {
-        if (!manager.userExists(username)) {
+    public boolean login(String login, String password) {
+        if (userService.userExists(login).isEmpty()) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(username);
-        String encryptedPassword = userDetails.getPassword();
-        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
-        return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
+        ru.skypro.homework.model.User user = userService.getUser(login);
+        String usersPassword = user.getPassword();
+        return encoder.matches(password, usersPassword);
     }
 
     @Override
@@ -39,14 +37,10 @@ public class AuthServiceImpl implements AuthService {
         if (manager.userExists(registerReq.getLogin())) {
             return false;
         }
-
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        manager.createUser(
-                User.withUsername(registerReq.getLogin())
-                        .password(encoder.encode(registerReq.getPassword()))
-                        .roles(role.name())
-                        .build()
-        );
+        String encodedPassword = encoder.encode(registerReq.getPassword());
+        registerReq.setPassword(encodedPassword);
+        registerReq.setRole(role);
+        userService.createUser(registerReq);
         return true;
     }
 }

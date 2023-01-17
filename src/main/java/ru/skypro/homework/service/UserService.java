@@ -1,13 +1,16 @@
 package ru.skypro.homework.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.model.User;
 
+import java.util.Optional;
+
 public interface UserService {
-    UserDto createUser(CreateUserDto userDto);
+
+    void createUser(RegisterReq registerReqDto);
 
     UserDto getUserMe();
 
@@ -28,4 +31,6 @@ public interface UserService {
     void uploadAvatar(MultipartFile file);
 
     byte[] downloadAvatar();
+
+    Optional<User> userExists(String login);
 }

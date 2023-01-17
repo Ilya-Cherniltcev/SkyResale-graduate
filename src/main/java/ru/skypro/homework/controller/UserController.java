@@ -26,42 +26,42 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Create new user
-     * Use method of service {@link UserService#createUser(CreateUserDto)}
-     *
-     * @return user
-     */
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Create a new user",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                            // schema = @Schema(implementation = .class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Created"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized"
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Not Found"
-            )
-    })
-    @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody CreateUserDto userDto) {
-        return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
-    }
+//    /**
+//     * Create new user
+//     * Use method of service {@link UserService#createUser(CreateUserDto)}
+//     *
+//     * @return user
+//     */
+//    @ApiResponses({
+//            @ApiResponse(
+//                    responseCode = "200",
+//                    description = "Create a new user",
+//                    content = @Content(
+//                            mediaType = MediaType.APPLICATION_JSON_VALUE
+//                            // schema = @Schema(implementation = .class)
+//                    )
+//            ),
+//            @ApiResponse(
+//                    responseCode = "201",
+//                    description = "Created"
+//            ),
+//            @ApiResponse(
+//                    responseCode = "401",
+//                    description = "Unauthorized"
+//            ),
+//            @ApiResponse(
+//                    responseCode = "403",
+//                    description = "Forbidden"
+//            ),
+//            @ApiResponse(
+//                    responseCode = "404",
+//                    description = "Not Found"
+//            )
+//    })
+//    @PostMapping
+//    public ResponseEntity<UserDto> addUser(@RequestBody CreateUserDto userDto) {
+//        return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
+//    }
 
     /**
      * get users
@@ -236,6 +236,5 @@ public class UserController {
     public ResponseEntity<UserDto> getUser(@PathVariable long id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
-
 }
 

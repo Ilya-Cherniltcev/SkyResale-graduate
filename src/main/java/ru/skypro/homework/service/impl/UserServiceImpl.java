@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.CreateUserDto;
+import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.*;
 import ru.skypro.homework.mapper.UserMapper;
@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 
 @Slf4j
@@ -39,10 +40,9 @@ public class UserServiceImpl implements UserService {
     private String userImageDir;
 
     @Override
-    public UserDto createUser(CreateUserDto userDto) {
-        User newUser = userRepository.save(userMapper.toUser(userDto));
-        newUser.setRole("USER");
-        return userMapper.toDto(newUser);
+    public void createUser(RegisterReq registerReqDto) {
+        User user = userMapper.registerReqDtoToUser(registerReqDto);
+        userRepository.save(user);
     }
 
 
@@ -164,5 +164,8 @@ public class UserServiceImpl implements UserService {
             throw new NoContentException();
         }
     }
-
+    @Override
+    public Optional<User> userExists(String login) {
+        return userRepository.findUserByLoginIgnoreCase(login);
+    }
 }

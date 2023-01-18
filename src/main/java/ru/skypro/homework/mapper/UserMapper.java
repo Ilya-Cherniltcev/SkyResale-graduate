@@ -2,21 +2,27 @@ package ru.skypro.homework.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.skypro.homework.dto.CreateUserDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.model.User;
+import ru.skypro.homework.model.UserAvatar;
 
 @Mapper
 public interface UserMapper {
 
-    @Mapping(source = "id", target = "userId")
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "image", expression = "java(getImageLink(user.getUserAvatar()))")
     UserDto toDto(User user);
-    @Mapping(target = "role", expression = "java(setRole())")
-//    @Mapping(target = "login", expression = "java(setLogin())")
-    User toUser (CreateUserDto userDto);
 
-    default String setRole() {
-        return "USER";
+    @Mapping(target = "phoneNumber", source = "registerReq.phone")
+    User toUser(RegisterReq registerReq);
+
+    @Transactional
+    default String getImageLink(UserAvatar userAvatar) {
+        if (userAvatar==null) {
+            return null;
+        }
+        return "/users/image/" + userAvatar.getAvatarId();
     }
-
 }

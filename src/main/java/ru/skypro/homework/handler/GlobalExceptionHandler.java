@@ -57,10 +57,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Комментарий от другого объявления");
     }
-    @ExceptionHandler(PasswordException.class)
-    public ResponseEntity<String> passwordExceptionHandler(PasswordException e) {
+    @ExceptionHandler(PasswordsAreNotEqualsException.class)
+    public ResponseEntity<String> passwordsAreNotEqualsExceptionHandler(PasswordsAreNotEqualsException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Проблема с паролем");
+                .body("Введен неверный текущий пароль");
+    }
+    @ExceptionHandler(PasswordsAreEqualsException.class)
+    public ResponseEntity<String> passwordsAreEqualsExceptionHandler(PasswordsAreEqualsException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Старый и новый пароли одинаковые");
     }
     @ExceptionHandler(SaveFileException.class)
     public ResponseEntity<String> saveFileExceptionHandler(SaveFileException e) {
@@ -76,6 +81,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> noContentExceptionHandler(NoContentException e) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body("Нет необходимых данных");
+    }
+    @ExceptionHandler(LoginAlreadyUsedException.class)
+    public ResponseEntity<String> loginAlreadyUsedExceptionHandler(LoginAlreadyUsedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Этот логин уже используется");
     }
 
 

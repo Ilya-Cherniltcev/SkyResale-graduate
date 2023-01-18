@@ -93,8 +93,8 @@ public class AdsController {
     })
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "adsDto") CreateAdsDto adsDto,
-                                         @RequestParam(value = "files") MultipartFile[] files) {
+    public ResponseEntity<AdsDto> addAds(@RequestPart(value = "properties") CreateAdsDto adsDto,
+                                         @RequestParam(value = "image") MultipartFile[] files) {
         return new ResponseEntity<>(adsService.createAds(adsDto, files), HttpStatus.CREATED);
     }
 
@@ -193,11 +193,18 @@ public class AdsController {
             )
     })
     @PatchMapping("{adsId}")
-    public ResponseEntity<AdsDto> updateAds(
-            @PathVariable long adsId,
-            @RequestBody CreateAdsDto adsDto) {
+    public ResponseEntity<AdsDto> updateAds(@PathVariable long adsId,
+                                            @RequestBody CreateAdsDto adsDto) {
         return new ResponseEntity<>(adsService.updateAds(adsId, adsDto), HttpStatus.OK);
     }
+
+    @PatchMapping(value = "{adsId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdsDto> updateAdsImage(@PathVariable long adsId,
+                                                 @RequestParam(value = "image") MultipartFile file
+                                                 ) {
+        return new ResponseEntity<>(adsService.updateAdsImage(adsId, file), HttpStatus.OK);
+    }
+
 
     /**
      * get my ads from DataBase

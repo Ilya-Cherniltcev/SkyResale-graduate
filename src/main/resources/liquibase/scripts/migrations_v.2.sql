@@ -82,3 +82,12 @@ ALTER TABLE IF EXISTS users_avatars
 
 ALTER TABLE IF EXISTS users_avatars
     ALTER COLUMN avatar_id SET DATA TYPE BIGINT;
+
+-- changeset yukov:2
+
+ALTER TABLE IF EXISTS users
+    ADD COLUMN reg_date  VARCHAR(255);
+
+ALTER TABLE IF EXISTS users
+    ADD COLUMN city  VARCHAR(255);
+

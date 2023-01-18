@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserMe() {
         return userMapper.toDto(getUserFromAuthentication());
     }
-
+    @Transactional
     @Override
     public UserDto updateUser(UserDto userDto) {
         testUserDtoNeededFieldsIsNotNull(userDto);
@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
+    @Override//todo delete thismethod
     public UserDto removeUser(long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(user);
     }
 
-    @Override
+    @Override//todo delete thismethod
     public UserDto getUserById(long id) {
         return userMapper.toDto(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
         return getUser(authentication.getName());
     }
 
-    @Override//not ready
+    @Override////todo delete thismethod
     public void uploadAvatar(MultipartFile file) {
         User user = getUserFromAuthentication();
         try {
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
+    @Override//todo delete thismethod
     public byte[] downloadAvatar() {
         UserAvatar avatar = userAvatarRepository.findUserAvatarByUser(getUserFromAuthentication())
                 .orElseThrow(UserAvatarNotFoundException::new);
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserAvatarNotFoundException::new);
     }
 
-
+    //todo delete thismethod
     private String getExtension(String originalFileName) {
         String extension = StringUtils.substringAfter(originalFileName, ".");
         if (!originalFileName.contains(".") || extension.isBlank() || extension.contains(".")) {

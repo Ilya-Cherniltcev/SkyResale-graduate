@@ -3,6 +3,8 @@ package ru.skypro.homework.service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 
+import java.util.UUID;
+
 public interface AdsService {
 
     ResponseWrapperAdsDto getAllAds();
@@ -27,5 +29,6 @@ public interface AdsService {
     AdsCommentDto deleteAdsComments(long adsId, long commentId);
 
     AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto);
-    byte[] getImage(Long adsImageId);
+    byte[] getImage(UUID adsImageId);
+
 }

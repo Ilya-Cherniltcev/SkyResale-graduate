@@ -1,58 +1,59 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.RegisterReq;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.exception.LoginAlreadyUsedException;
+import ru.skypro.homework.exception.UserNotFoundException;
+import ru.skypro.homework.model.Role;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
+    private final AuthenticationManager manager;
 
     private final PasswordEncoder encoder;
 
     private final UserService userService;
 
-
-    public AuthServiceImpl(UserDetailsManager manager, UserService userService) {
-        this.manager = manager;
-        this.userService = userService;
-        this.encoder = new BCryptPasswordEncoder();
-    }
-
+    /**
+     * Authenticate User in signin form
+     *
+     * @param username login for authentication
+     * @param password password for authentication
+     * @return true if User authenticated
+     * @throws UserNotFoundException – if needed User not found in database
+     */
+    @Transactional
     @Override
-    public boolean login(String login, String password) {
-        if (!manager.userExists(login)) {
-            return false;
-        }
-        UserDetails userDetails = manager.loadUserByUsername(login);
-        String encryptedPassword = userDetails.getPassword();
-        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
-        return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
+    public boolean login(String username, String password) {
+        userService.checkUserExists(username);
+
+        Authentication authentication = manager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return authentication.isAuthenticated();
     }
 
+    /**
+     * Check login for uniqueness, if login is unique create new {@link ru.skypro.homework.model.User} in {@link ru.skypro.homework.repository.UserRepository}
+     *
+     * @param registerReq Dto from registration form
+     * @param role        role of this User
+     * @return true if new User created and added in database
+     * @throws LoginAlreadyUsedException if User with this login already existed
+     */
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
-        if (manager.userExists(registerReq.getLogin())) {
-            return false;
-        }
-
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        manager.createUser(
-                User.withUsername(registerReq.getLogin())
-                        .password(encoder.encode(registerReq.getPassword()))
-                        .roles(role.name())
-                        .build()
-        );
-        if (userService.testUserForRegisterOk(registerReq.getLogin())) {
+        if (userService.checkUserForRegisterOk(registerReq.getLogin())) {
             registerReq.setRole(role);
             registerReq.setPassword(encoder.encode(registerReq.getPassword()));
             userService.createUser(registerReq);

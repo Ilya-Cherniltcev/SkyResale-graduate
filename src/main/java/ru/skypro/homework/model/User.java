@@ -44,8 +44,9 @@ public class User {
     private String regDate;
     @Column(name = "city")
     private String city;
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private String role;
+    private Role role;
     @OneToOne (fetch = FetchType.LAZY, mappedBy = "user")
     @JsonIgnore
     @JoinColumn(name = "avatar")

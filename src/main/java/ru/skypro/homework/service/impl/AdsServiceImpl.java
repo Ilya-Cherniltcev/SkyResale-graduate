@@ -93,6 +93,23 @@ public class AdsServiceImpl implements AdsService {
         return adsMapper.toDto(adsRepository.save(updatedAds));
     }
 
+    @Transactional
+    @Override
+    public AdsDto updateAdsImage(long adsId, MultipartFile file) {
+        Ads ads = findAds(adsId);
+        testThisIsYourAdsOrYouAdmin(ads, userService.getUserFromAuthentication());
+        try {
+            AdsImage newAdsImage = imageMapper.toAdsImage(file);
+            adsImageRepository.deleteAdsImagesByAds(ads);
+            newAdsImage.setAds(ads);
+            adsImageRepository.save(newAdsImage);
+        } catch (IOException e) {
+            throw new SaveFileException();
+        }
+        Ads updads = findAds(adsId);
+        return adsMapper.toDto(updads);
+    }
+
 
     @Transactional
     @Override
@@ -136,6 +153,7 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(adsCommentRepository.save(comment));
     }
 
+    @Transactional
     @Override
     public AdsCommentDto getAdsComment(long adsId, long commentId) {
         return adsCommentMapper.toDto(getCommentsIfPresent(adsId, commentId));
@@ -182,17 +200,20 @@ public class AdsServiceImpl implements AdsService {
                 .orElseThrow(AdsImageNotFoundException::new);
     }
 
-    private Ads findAds(long adsId) {
+    @Transactional
+    protected Ads findAds(long adsId) {
         return adsRepository.findAdsById(adsId)
                 .orElseThrow(AdsNotFoundException::new);
     }
 
-    private AdsComment findAdsComment(long commentId) {
+    @Transactional
+    protected AdsComment findAdsComment(long commentId) {
         return adsCommentRepository.findAdsCommentById(commentId)
                 .orElseThrow(AdsCommentNotFoundException::new);
     }
 
-    private AdsComment getCommentsIfPresent(long adsId, long commentId) {
+    @Transactional
+    protected AdsComment getCommentsIfPresent(long adsId, long commentId) {
         AdsComment adsComment = findAdsComment(commentId);
         if (!adsComment.getAds().getId().equals(adsId)) {
             throw new CommentFromAnotherAdsException();

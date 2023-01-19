@@ -1,5 +1,6 @@
 package ru.skypro.homework.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,11 +40,16 @@ public class User {
 
     @Column(name = "phone_number")
     private String phoneNumber;
-
+    @Column(name = "reg_date")
+    private String regDate;
+    @Column(name = "city")
+    private String city;
     @Column(name = "role")
     private String role;
-
-
+    @OneToOne (fetch = FetchType.LAZY, mappedBy = "user")
+    @JsonIgnore
+    @JoinColumn(name = "avatar")
+    private UserAvatar userAvatar;
 
 
     @Override

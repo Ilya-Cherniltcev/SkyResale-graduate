@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.service.UserService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -18,17 +19,21 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder encoder;
 
-    public AuthServiceImpl(UserDetailsManager manager) {
+    private final UserService userService;
+
+
+    public AuthServiceImpl(UserDetailsManager manager, UserService userService) {
         this.manager = manager;
+        this.userService = userService;
         this.encoder = new BCryptPasswordEncoder();
     }
 
     @Override
-    public boolean login(String username, String password) {
-        if (!manager.userExists(username)) {
+    public boolean login(String login, String password) {
+        if (!manager.userExists(login)) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(username);
+        UserDetails userDetails = manager.loadUserByUsername(login);
         String encryptedPassword = userDetails.getPassword();
         String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
@@ -54,6 +59,12 @@ public class AuthServiceImpl implements AuthService {
                         .roles(role.name())
                         .build()
         );
+        if (userService.testUserForRegisterOk(registerReq.getLogin())) {
+            registerReq.setRole(role);
+            registerReq.setPassword(encoder.encode(registerReq.getPassword()));
+            userService.createUser(registerReq);
+        }
         return true;
     }
+
 }

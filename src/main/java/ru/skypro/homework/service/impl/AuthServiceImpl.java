@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +14,7 @@ import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserDetailsManager manager;
@@ -28,9 +30,18 @@ public class AuthServiceImpl implements AuthService {
         this.encoder = new BCryptPasswordEncoder();
     }
 
+    /**
+     * Метод входа в систему пользователя, принимающий в параметры
+     * @param login
+     * @param password
+     * @return
+     */
     @Override
     public boolean login(String login, String password) {
+        log.info("try to log in to the user's system");
         if (!manager.userExists(login)) {
+            log.warn("Неверное имя пользователя");
+
             return false;
         }
         UserDetails userDetails = manager.loadUserByUsername(login);
@@ -48,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
+        log.info("регистрация пользователя");
         if (manager.userExists(registerReq.getLogin())) {
             return false;
         }

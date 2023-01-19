@@ -4,8 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.model.User;
 
-import java.util.Optional;
-
 public interface UserService {
     UserDto createUser(RegisterReq registerReq);
 
@@ -19,11 +17,9 @@ public interface UserService {
 
     UserDto removeUser(long id);
 
-    UserDto getUserById(long id);
-
     User getUser(String login);
 
-    boolean testUserForRegisterOk(String login);
+    boolean checkUserForRegisterOk(String login);
 
     boolean isAdmin();
 
@@ -35,5 +31,5 @@ public interface UserService {
 
     byte[] getAvatar(Long avatarId);
 
-    Optional<User> userExists(String login);
+    boolean checkUserExists(String login);
 }

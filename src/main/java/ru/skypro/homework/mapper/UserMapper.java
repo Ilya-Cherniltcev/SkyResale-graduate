@@ -16,11 +16,12 @@ public interface UserMapper {
     UserDto toDto(User user);
 
     @Mapping(target = "phoneNumber", source = "registerReq.phone")
+    @Mapping(target = "role", source = "registerReq.role")
     User toUser(RegisterReq registerReq);
 
     @Transactional
     default String getImageLink(UserAvatar userAvatar) {
-        if (userAvatar==null) {
+        if (userAvatar == null) {
             return null;
         }
         return "/users/image/" + userAvatar.getAvatarId();

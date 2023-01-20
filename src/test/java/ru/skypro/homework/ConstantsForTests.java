@@ -27,7 +27,7 @@ public class ConstantsForTests {
     public static final Long DEFAULT_USER_AVATAR_ID = 1L;
     public static final byte[] DEFAULT_USER_AVATAR = "f6d73k9r".getBytes(StandardCharsets.UTF_8);
 
-    // --------------------------------------------------------
+    // -----------------------------------------------
     public static final Long DEFAULT_ADS_ID = 1L;
     public static final String DEFAULT_ADS_TITLE = "Elephant";
     public static final String DEFAULT_ADS_DESCRIPTION = "Very big and cool";

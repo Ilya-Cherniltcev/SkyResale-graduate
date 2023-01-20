@@ -44,13 +44,16 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public ResponseWrapperAdsDto getAllAds() {
+        log.info("try to get all ads");
         List<AdsDto> adsDtoList = toAdsDtoList(adsRepository.findAll());
         return responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
     @Override
     public AdsDto createAds(CreateAdsDto adsDto, MultipartFile[] files) {
+        log.info("try to add ads");
         User user = userService.getUserFromAuthentication();
+        log.info("try to get user from authentication");
         try {
             Ads newAds = adsRepository.save(adsMapper.createAds(adsDto, user));
 
@@ -67,6 +70,7 @@ public class AdsServiceImpl implements AdsService {
 
             return adsMapper.toDto(response);
         } catch (IOException e) {
+            log.warn("ads hasn't saved");
             throw new SaveFileException();
         }
     }
@@ -74,6 +78,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public ResponseWrapperAdsDto getAdsMe() {
+        log.info("try to get all ads of one user");
         User user = userService.getUserFromAuthentication();
         List<AdsDto> adsDtoList = toAdsDtoList(
                 adsRepository.findAll().stream()
@@ -85,13 +90,13 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsDto updateAds(long adsId, CreateAdsDto adsDto) {
+        log.info("try to update ads");
         checkAdsDtoNeededFieldsIsNotNull(adsDto);
         Ads ads = findAds(adsId);
+        log.info("try to find ads by id");
         User user = userService.getUserFromAuthentication();
         checkThisIsYourAdsOrYouAdmin(ads, user);
-
         Ads updatedAds = adsMapper.updAds(adsDto, ads);
-
         log.info("The ad with id = {} was updated ", adsId);
         return adsMapper.toDto(adsRepository.save(updatedAds));
     }
@@ -99,7 +104,9 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsDto updateAdsImage(long adsId, MultipartFile file) {
+        log.info("try to update ads image");
         Ads ads = findAds(adsId);
+        log.info("try to find ads by id");
         checkThisIsYourAdsOrYouAdmin(ads, userService.getUserFromAuthentication());
         try {
             AdsImage newAdsImage = imageMapper.toAdsImage(file);
@@ -107,6 +114,7 @@ public class AdsServiceImpl implements AdsService {
             newAdsImage.setAds(ads);
             adsImageRepository.save(newAdsImage);
         } catch (IOException e) {
+            log.warn("unable to save image");
             throw new SaveFileException();
         }
         Ads updAds = findAds(adsId);
@@ -116,6 +124,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsDto removeAds(long adsId) {
+        log.info("try to remove ads if it's found by id");
         Ads adsForRemove = findAds(adsId);
         User user = userService.getUserFromAuthentication();
         checkThisIsYourAdsOrYouAdmin(adsForRemove, user);
@@ -132,6 +141,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public ResponseWrapperCommentDto getAdsComments(long adsId) {
+        log.info("try to get ads comments");
         List<AdsCommentDto> adsCommentDtoList = adsCommentRepository.findAdsCommentByAds(findAds(adsId)).stream()
                 .map(adsCommentMapper::toDto)
                 .sorted(Comparator.comparing(AdsCommentDto::getCreatedAt))
@@ -142,6 +152,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsCommentDto createAdsComments(long adsId, AdsCommentDto adsCommentDto) {
+        log.info("try to create comment for found by id ads");
         AdsComment comment = adsCommentMapper.toAdsComment(adsCommentDto);
         User user = userService.getUserFromAuthentication();
 
@@ -154,12 +165,14 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsCommentDto getAdsComment(long adsId, long commentId) {
+        log.info("try to get comment for ads by comment id and ads id");
         return adsCommentMapper.toDto(getCommentsIfPresent(adsId, commentId));
     }
 
     @Transactional
     @Override
     public AdsCommentDto deleteAdsComments(long adsId, long commentId) {
+        log.info("try to remove comment for ads by comment id and ads id");
         AdsComment comment = getCommentsIfPresent(adsId, commentId);
         User user = userService.getUserFromAuthentication();
         checkThisIsYourCommentOrYouAdmin(comment, user);
@@ -170,6 +183,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     @Override
     public AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto) {
+        log.info("try to remove comment for ads by comment id and ads id");
         checkAdsCommentDtoTextIsNotNull(adsCommentDto);
         User user = userService.getUserFromAuthentication();
         AdsComment comment = findAdsComment(commentId);
@@ -180,6 +194,7 @@ public class AdsServiceImpl implements AdsService {
         comm.setAds(findAds(adsId));
         comm.setId(commentId);
         comm.setCreatedAt(OffsetDateTime.now());
+        log.info("comment updated");
         return adsCommentMapper.toDto(adsCommentRepository.save(comm));
     }
 
@@ -211,6 +226,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Transactional
     protected Ads findAds(long adsId) {
+        log.info("try to find ads by ads id");
         return adsRepository.findAdsById(adsId)
                 .orElseThrow(AdsNotFoundException::new);
     }
@@ -223,6 +239,7 @@ public class AdsServiceImpl implements AdsService {
      */
     @Transactional
     protected AdsComment findAdsComment(long commentId) {
+        log.info("try to find comment by comment id");
         return adsCommentRepository.findAdsCommentById(commentId)
                 .orElseThrow(AdsCommentNotFoundException::new);
     }

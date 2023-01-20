@@ -46,7 +46,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(RegisterReq registerReq) {
+        log.info("Trying to create and save new user");
         User newUser = userRepository.save(userMapper.toUser(registerReq));
+        log.info("The user with id = {} was saved ", newUser.getId());
         return userMapper.toDto(newUser);
     }
 
@@ -59,42 +61,52 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto updateUser(UserDto userDto) {
+        log.info("Trying to update the userDto with username = {}", userDto.getLogin());
         checkUserDtoNeededFieldsIsNotNull(userDto);
+        log.info("Trying to check that needed fields is not null ");
         User user = getUserFromAuthentication();
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhoneNumber(userDto.getPhoneNumber());
         User response = userRepository.save(user);
+        log.info("The userDto with id = {} was updated ", response.getId());
         return userMapper.toDto(response);
     }
 
     @Transactional
     @Override
     public UserDto updateUserImage(MultipartFile file) {
+        log.info("Trying to update image at the userDto");
         User user = getUserFromAuthentication();
+        log.info("The userDto is found, updating...");
         if (userAvatarRepository.findUserAvatarByUser(user).isPresent()) {
+            log.info("if avatar is found, delete it");
             userAvatarRepository.deleteUserAvatarByUser(user);
         }
         try {
             UserAvatar newUserAvatar = imageMapper.toUserAvatar(file);
             newUserAvatar.setUser(user);
             userAvatarRepository.save(newUserAvatar);
+            log.info("Avatar was updated");
         } catch (IOException e) {
+            log.warn("unable to save image");
             throw new SaveFileException();
-        }
+                    }
         return userMapper.toDto(user);
     }
 
     @Transactional
     @Override
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto) {
+        log.info("trying to set new password");
         if (newPasswordDto.getCurrentPassword().equals(newPasswordDto.getNewPassword())) {
-            throw new PasswordsAreEqualsException();
+             throw new PasswordsAreEqualsException();
         }
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         User user = getUserFromAuthentication();
         if (!encoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {
+            log.debug("пароли не совпадают");
             throw new PasswordsAreNotEqualsException();
         }
 
@@ -110,6 +122,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto removeUser(long id) {
+        log.info("try to remove if found by id");
         User userForDelete = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
         adsRepository.deleteAllByAuthor(userForDelete);
@@ -136,6 +149,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public boolean checkUserExists(String login) {
+        log.info("Try to сheck check whether the login is used or not");
         userRepository.findUserByLoginIgnoreCase(login)
                 .orElseThrow(UserNotFoundException::new);
         return true;
@@ -143,6 +157,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isAdmin() {
+        log.info("Try to check whether the user is an administrator or not");
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("admin_full_access"));
     }
@@ -150,13 +165,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User getUserFromAuthentication() {
+        log.info("Try to get user from authentication");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getUser(authentication.getName());
     }
 
     @Override////todo delete thismethod
     public void uploadAvatar(MultipartFile file) {
+        log.info("try to upload avatar");
         User user = getUserFromAuthentication();
+        log.info("try to get user from authentication ");
         try {
             Path filePath = Path.of(userImageDir, user.getId() + "." + getExtension(file.getOriginalFilename()));
             Files.createDirectories((filePath.getParent()));
@@ -178,6 +196,7 @@ public class UserServiceImpl implements UserService {
 
     @Override//todo delete thismethod
     public byte[] downloadAvatar() {
+        log.info("try to download avatar");
         UserAvatar avatar = userAvatarRepository.findUserAvatarByUser(getUserFromAuthentication())
                 .orElseThrow(UserAvatarNotFoundException::new);
         try {
@@ -190,6 +209,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public byte[] getAvatar(UUID avatarUuid) {
+        log.info("Try to find avatar by Uuid");
         return userAvatarRepository.findUserAvatarByAvatarUuid(avatarUuid)
                 .map(UserAvatar::getData)
                 .orElseThrow(UserAvatarNotFoundException::new);

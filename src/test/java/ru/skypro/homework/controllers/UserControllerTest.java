@@ -30,6 +30,7 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.skypro.homework.ConstantsForTests.*;
@@ -49,8 +50,7 @@ class UserControllerTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    @MockBean
-    private UserAvatar avatar;
+    private final UserAvatar avatar = new UserAvatar();
     @MockBean
     private UserServiceImpl userService;
     @MockBean
@@ -78,6 +78,9 @@ class UserControllerTest {
         user.setFirstName(DEFAULT_FIRSTNAME);
         user.setLastName(DEFAULT_LASTNAME);
         user.setPhoneNumber(DEFAULT_PHONE);
+
+        UUID uuid = new UUID(1,1);
+        avatar.setAvatarUuid(uuid);
 
         userDto.setUserId(DEFAULT_USER_ID);
         userDto.setLogin(DEFAULT_USERNAME);
@@ -172,12 +175,12 @@ class UserControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test   // ===============================================================
+    @Test
     public void testGetImage() throws Exception {
         when(userRepository.findUserByLoginIgnoreCase(DEFAULT_USERNAME))
                 .thenReturn(Optional.of(userAvatarEntity));
         when(userAvatarRepository.findUserAvatarByAvatarUuid(any()))
-                .thenReturn(Optional.ofNullable(avatar));
+                .thenReturn(Optional.of(avatar));
         userService.getAvatar(avatar.getAvatarUuid());
 
         mockMvc.perform(MockMvcRequestBuilders

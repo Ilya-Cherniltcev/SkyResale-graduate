@@ -18,6 +18,8 @@ import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.model.UserAvatar;
 import ru.skypro.homework.service.UserService;
 
+import java.util.UUID;
+
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -161,7 +163,7 @@ public class UserController {
     }
     /**
      * Download {@link UserAvatar} to frontend<br>
-     * Use method of service {@link UserService#getAvatar(Long)}
+     * Use method of service {@link UserService#getAvatar(UUID)}
      *
      * @return Needed image
      */
@@ -178,10 +180,10 @@ public class UserController {
                     description = "Image Not Found"
             )
     })
-    @GetMapping("/image/{avatarId}")
-    @PreAuthorize("hasAuthority('user_basic_access')")
-    public ResponseEntity<byte[]> getImage(@PathVariable long avatarId) {
-        return new ResponseEntity<>(userService.getAvatar(avatarId), HttpStatus.OK);
+    @GetMapping("/image/{avatarUuid}")
+//    @PreAuthorize("hasAuthority('user_basic_access')")
+    public ResponseEntity<byte[]> getImage(@PathVariable UUID avatarUuid) {
+        return new ResponseEntity<>(userService.getAvatar(avatarUuid), HttpStatus.OK);
     }
 
     /**

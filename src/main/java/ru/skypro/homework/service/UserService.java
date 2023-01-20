@@ -4,6 +4,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.model.User;
 
+import java.util.UUID;
+
 public interface UserService {
     UserDto createUser(RegisterReq registerReq);
 
@@ -29,7 +31,7 @@ public interface UserService {
 
     byte[] downloadAvatar();
 
-    byte[] getAvatar(Long avatarId);
+    byte[] getAvatar(UUID avatarUuid);
 
     boolean checkUserExists(String login);
 }

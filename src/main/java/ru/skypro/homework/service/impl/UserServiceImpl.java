@@ -17,6 +17,7 @@ import ru.skypro.homework.mapper.ImageMapper;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.model.UserAvatar;
+import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.UserAvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ import java.nio.file.Paths;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final AdsRepository adsRepository;
     private final UserAvatarRepository userAvatarRepository;
     private final UserMapper userMapper;
     private final ImageMapper imageMapper;
@@ -139,12 +142,14 @@ public class UserServiceImpl implements UserService {
      * @return UserDto of removed User
      * @throws UserNotFoundException if this User not exist in database
      */
+    @Transactional
     @Override
     public UserDto removeUser(long id) {
-        User user = userRepository.findById(id)
+        User userForDelete = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
-        userRepository.delete(user);
-        return userMapper.toDto(user);
+        adsRepository.deleteAllByAuthor(userForDelete);
+        userRepository.delete(userForDelete);
+        return userMapper.toDto(userForDelete);
     }
 
     /**
@@ -245,14 +250,14 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Get array of byte of {@link UserAvatar} from {@link UserAvatarRepository}
-     * @param avatarId Id in database
+     * @param avatarUuid Id in database
      * @return Avatar
      * @throws UserAvatarNotFoundException if Avatar not found in database
      */
     @Transactional
     @Override
-    public byte[] getAvatar(Long avatarId) {
-        return userAvatarRepository.findUserAvatarByAvatarId(avatarId)
+    public byte[] getAvatar(UUID avatarUuid) {
+        return userAvatarRepository.findUserAvatarByAvatarUuid(avatarUuid)
                 .map(UserAvatar::getData)
                 .orElseThrow(UserAvatarNotFoundException::new);
     }

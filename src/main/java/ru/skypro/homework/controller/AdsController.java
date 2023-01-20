@@ -17,6 +17,8 @@ import ru.skypro.homework.dto.*;
 import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.service.AdsService;
 
+import java.util.UUID;
+
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -425,7 +427,7 @@ public class AdsController {
 
     /**
      * Download {@link AdsImage} to frontend<br>
-     * Use method of service {@link AdsService#getImage(Long)}
+     * Use method of service {@link AdsService#getImage(UUID)}
      *
      * @return Needed image
      */
@@ -442,9 +444,9 @@ public class AdsController {
                     description = "Image Not Found"
             )
     })
-    @GetMapping("/image/{adsImageId}")
-    public ResponseEntity<byte[]> getImage(@PathVariable long adsImageId) {
-        return new ResponseEntity<>(adsService.getImage(adsImageId), HttpStatus.OK);
+    @GetMapping("/image/{adsImageUUID}")
+    public ResponseEntity<byte[]> getImage(@PathVariable UUID adsImageUUID) {
+        return new ResponseEntity<>(adsService.getImage(adsImageUUID), HttpStatus.OK);
     }
 
 }

@@ -8,6 +8,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Класс аватар пользователя
@@ -20,9 +21,9 @@ import java.util.Objects;
 @Table(name = "users_avatars")
 public class UserAvatar {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "avatar_id")
-    private Long avatarId;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "avatar_uuid")
+    private UUID avatarUuid;
     @Column(name = "file_path")
     private String filePath;
 
@@ -45,7 +46,7 @@ public class UserAvatar {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         UserAvatar that = (UserAvatar) o;
-        return avatarId != null && Objects.equals(avatarId, that.avatarId);
+        return avatarUuid != null && Objects.equals(avatarUuid, that.avatarUuid);
     }
 
     @Override

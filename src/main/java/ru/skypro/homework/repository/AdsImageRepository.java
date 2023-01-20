@@ -7,11 +7,12 @@ import ru.skypro.homework.model.AdsImage;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface AdsImageRepository extends JpaRepository<AdsImage,Long> {
 
-    Optional<AdsImage> findAdsImageById(long adsImageId);
+    Optional<AdsImage> findAdsImageByUuid(UUID adsImageUuid);
 
     Collection<AdsImage> findAdsImagesByAds(Ads ads);
 

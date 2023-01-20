@@ -22,7 +22,9 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,8 +140,8 @@ public class AdsServiceImpl implements AdsService {
         } catch (IOException e) {
             throw new SaveFileException();
         }
-        Ads updads = findAds(adsId);
-        return adsMapper.toDto(updads);
+        Ads updAds = findAds(adsId);
+        return adsMapper.toDto(updAds);
     }
 
     /**
@@ -157,8 +159,8 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.getUserFromAuthentication();
         checkThisIsYourAdsOrYouAdmin(adsForRemove, user);
 
-        adsCommentRepository.deleteAdsCommentsByAds(adsForRemove);
-        adsImageRepository.deleteAdsImagesByAds(adsForRemove);
+//        adsCommentRepository.deleteAdsCommentsByAds(adsForRemove);
+//        adsImageRepository.deleteAdsImagesByAds(adsForRemove);
 
         adsRepository.deleteById(adsId);
         return adsMapper.toDto(adsForRemove);
@@ -186,6 +188,7 @@ public class AdsServiceImpl implements AdsService {
     public ResponseWrapperCommentDto getAdsComments(long adsId) {
         List<AdsCommentDto> adsCommentDtoList = adsCommentRepository.findAdsCommentByAds(findAds(adsId)).stream()
                 .map(adsCommentMapper::toDto)
+                .sorted(Comparator.comparing(AdsCommentDto::getCreatedAt))
                 .collect(Collectors.toList());
         return responseWrapperAdsCommentMapper.toResponseWrapperCommentDto(adsCommentDtoList.size(), adsCommentDtoList);
     }
@@ -276,14 +279,14 @@ public class AdsServiceImpl implements AdsService {
     }
     /**
      * Get array of byte of {@link AdsImage} from {@link AdsImageRepository}
-     * @param adsImageId Id in database
+     * @param adsImageUUID UUID in database
      * @return AdsImage
      * @throws AdsImageNotFoundException if AdsImage not found in database
      */
     @Transactional
     @Override
-    public byte[] getImage(Long adsImageId) {
-        return adsImageRepository.findAdsImageById(adsImageId)
+    public byte[] getImage(UUID adsImageUUID) {
+        return adsImageRepository.findAdsImageByUuid(adsImageUUID)
                 .map(AdsImage::getData)
                 .orElseThrow(AdsImageNotFoundException::new);
     }
@@ -299,6 +302,7 @@ public class AdsServiceImpl implements AdsService {
         return adsRepository.findAdsById(adsId)
                 .orElseThrow(AdsNotFoundException::new);
     }
+
     /**
      * Find comment by commentId in {@link AdsCommentRepository}
      * @param commentId Id of comment in database

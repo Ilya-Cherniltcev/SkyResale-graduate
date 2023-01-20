@@ -24,6 +24,6 @@ public interface UserMapper {
         if (userAvatar == null) {
             return null;
         }
-        return "/users/image/" + userAvatar.getAvatarId();
+        return "/users/image/" + userAvatar.getAvatarUuid();
     }
 }

@@ -8,6 +8,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Класс изображения из объявлений
@@ -20,9 +21,9 @@ import java.util.Objects;
 @Table(name = "ads_image")
 public class AdsImage {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ads_image_id")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ads_image_uuid")
+    private UUID uuid;
     @ManyToOne
     @JoinColumn(name = "ads_id")
     private Ads ads;
@@ -45,7 +46,7 @@ public class AdsImage {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         AdsImage adsImage = (AdsImage) o;
-        return id != null && Objects.equals(id, adsImage.id);
+        return uuid != null && Objects.equals(uuid, adsImage.uuid);
     }
 
     @Override

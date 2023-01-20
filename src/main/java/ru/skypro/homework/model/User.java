@@ -47,7 +47,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
-    @OneToOne (fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToOne (fetch = FetchType.LAZY, mappedBy = "user",cascade = CascadeType.ALL)
     @JsonIgnore
     @JoinColumn(name = "avatar")
     private UserAvatar userAvatar;

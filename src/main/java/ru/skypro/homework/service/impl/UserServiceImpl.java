@@ -22,7 +22,6 @@ import ru.skypro.homework.repository.UserAvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,33 +43,19 @@ public class UserServiceImpl implements UserService {
     @Value("userImage")
     private String userImageDir;
 
-    /**
-     * Create new {@link User} in {@link UserRepository}
-     * @param registerReq data from register form
-     * @return new UserDto
-     */
+
     @Override
     public UserDto createUser(RegisterReq registerReq) {
         User newUser = userRepository.save(userMapper.toUser(registerReq));
         return userMapper.toDto(newUser);
     }
 
-    /**
-     * Get user data for current {@link User} from {@link UserRepository}
-     * @return needed data
-     */
     @Transactional
     @Override
     public UserDto getUserMe() {
         return userMapper.toDto(getUserFromAuthentication());
     }
 
-    /**
-     * Update {@link User} data in {@link UserRepository}
-     * @param userDto needed data for update User, must be {@link NotNull}
-     * @return Updated UserDto
-     * @throws NoContentException if one of fields is {@link Null}
-     */
     @Transactional
     @Override
     public UserDto updateUser(UserDto userDto) {
@@ -84,12 +69,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(response);
     }
 
-    /**
-     * Update current or create new {@link UserAvatar} in {@link UserAvatarRepository}
-     * @param file uploaded file
-     * @return Updated UserDto
-     * @throws SaveFileException if something went wrong, when image updated
-     */
     @Transactional
     @Override
     public UserDto updateUserImage(MultipartFile file) {
@@ -107,13 +86,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(user);
     }
 
-    /**
-     *Change current password of current {@link User} in {@link UserRepository}
-     * @param newPasswordDto needed passwords from input form
-     * @return updated password
-     * @throws PasswordsAreEqualsException if current password and new password are same
-     * @throws PasswordsAreNotEqualsException if written current password is not equal of password current User
-     */
     @Transactional
     @Override
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto) {
@@ -135,13 +107,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    /**
-     * Delete {@link User} by Id from {@link UserRepository}
-     * <br> ONLY FOR ADMIN
-     * @param id Id of User
-     * @return UserDto of removed User
-     * @throws UserNotFoundException if this User not exist in database
-     */
     @Transactional
     @Override
     public UserDto removeUser(long id) {
@@ -152,12 +117,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userForDelete);
     }
 
-    /**
-     * Find {@link User} by login (ignore case) in database via method {@link UserRepository}
-     * @param login of needed User
-     * @return Founded User
-     * @throws UserNotFoundException if User not found in database
-     */
     @Transactional
     @Override
     public User getUser(String login) {
@@ -165,12 +124,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    /**
-     * Check login before create new {@link User}
-     * @param login which was written in register form
-     * @return true if all is OK
-     * @throws LoginAlreadyUsedException if this login already used
-     */
     @Transactional
     @Override
     public boolean checkUserForRegisterOk(String login) {
@@ -180,12 +133,6 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    /**
-     * Check {@link User} with needed login is existed
-     * @param login needed login
-     * @return true if user existed
-     * @throws UserNotFoundException – if needed User not found in database
-     */
     @Transactional
     @Override
     public boolean checkUserExists(String login) {
@@ -194,20 +141,12 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    /**
-     * Check current User is Admin
-     * @return true if User is Admin
-     */
     @Override
     public boolean isAdmin() {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("admin_full_access"));
     }
 
-    /**
-     * Get User from Authentication
-     * @return User
-     */
     @Transactional
     @Override
     public User getUserFromAuthentication() {
@@ -248,12 +187,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * Get array of byte of {@link UserAvatar} from {@link UserAvatarRepository}
-     * @param avatarUuid Id in database
-     * @return Avatar
-     * @throws UserAvatarNotFoundException if Avatar not found in database
-     */
     @Transactional
     @Override
     public byte[] getAvatar(UUID avatarUuid) {

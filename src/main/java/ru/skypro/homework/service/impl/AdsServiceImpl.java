@@ -40,10 +40,7 @@ public class AdsServiceImpl implements AdsService {
     private final ResponseWrapperCommentMapper responseWrapperAdsCommentMapper;
     private final ImageMapper imageMapper;
     private final AdsCommentMapper adsCommentMapper;
-    /**
-     * Get all {@link Ads} from {@link AdsRepository}
-     * @return Collection of needed ads with quantity of ads in this collection
-     */
+
     @Transactional
     @Override
     public ResponseWrapperAdsDto getAllAds() {
@@ -51,19 +48,11 @@ public class AdsServiceImpl implements AdsService {
         return responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
-    /**
-     * Create {@link Ads} in {@link AdsRepository} and create {@link AdsImage} in {@link AdsImageRepository}
-     * @param ads data for create Ads
-     * @param files images for Ads
-     * @return Created Ads
-     * @throws UserNotFoundException – if User not found in database
-     * @throws SaveFileException if something went wrong, when image updated
-     */
     @Override
-    public AdsDto createAds(CreateAdsDto ads, MultipartFile[] files) {
+    public AdsDto createAds(CreateAdsDto adsDto, MultipartFile[] files) {
         User user = userService.getUserFromAuthentication();
         try {
-            Ads newAds = adsRepository.save(adsMapper.createAds(ads, user));
+            Ads newAds = adsRepository.save(adsMapper.createAds(adsDto, user));
 
             List<AdsImage> adsImageList = new ArrayList<>();
             for (MultipartFile file : files) {
@@ -82,11 +71,6 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-    /**
-     * Get all {@link Ads} from {@link AdsRepository} which belong to current {@link User}
-     * @return Collection of needed ads with quantity of ads in this collection
-     * @throws UserNotFoundException – if User not found in database
-     */
     @Transactional
     @Override
     public ResponseWrapperAdsDto getAdsMe() {
@@ -98,14 +82,6 @@ public class AdsServiceImpl implements AdsService {
         return responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList);
     }
 
-    /**
-     * Update {@link Ads} in {@link AdsRepository}
-     * @param adsId Id of needed Ads
-     * @param adsDto data for update
-     * @return Updated Ads
-     * @throws NoContentException if fields of current Dto are empty
-     * @throws ItIsNotYourAdsException if current User hasn't right for doing something with this Ads
-     */
     @Transactional
     @Override
     public AdsDto updateAds(long adsId, CreateAdsDto adsDto) {
@@ -120,13 +96,6 @@ public class AdsServiceImpl implements AdsService {
         return adsMapper.toDto(adsRepository.save(updatedAds));
     }
 
-    /**
-     * Update {@link AdsImage} in {@link AdsImageRepository}
-     * @param adsId Id of needed Ads
-     * @param file uploaded file
-     * @return Updated Ads
-     * @throws SaveFileException if something went wrong, when image updated
-     */
     @Transactional
     @Override
     public AdsDto updateAdsImage(long adsId, MultipartFile file) {
@@ -144,45 +113,22 @@ public class AdsServiceImpl implements AdsService {
         return adsMapper.toDto(updAds);
     }
 
-    /**
-     * Delete {@link Ads} from {@link AdsRepository}<br>
-     * Delete {@link AdsComment} which belong to this Ads from {@link AdsCommentRepository}<br>
-     * Delete {@link AdsImage} which belong to this Ads from {@link AdsImageRepository}
-     * @param adsId Id of needed Ads
-     * @return Deleted Ads
-     * @throws ItIsNotYourAdsException if current User hasn't right for doing something with this Ads
-     */
     @Transactional
     @Override
     public AdsDto removeAds(long adsId) {
         Ads adsForRemove = findAds(adsId);
         User user = userService.getUserFromAuthentication();
         checkThisIsYourAdsOrYouAdmin(adsForRemove, user);
-
-//        adsCommentRepository.deleteAdsCommentsByAds(adsForRemove);
-//        adsImageRepository.deleteAdsImagesByAds(adsForRemove);
-
         adsRepository.deleteById(adsId);
         return adsMapper.toDto(adsForRemove);
     }
 
-    /**
-     * Get full data about needed {@link Ads}
-     * @param adsId Id of needed Ads
-     * @return Full needed data
-     * @throws AdsNotFoundException if Ads with adsId not found in database
-     */
     @Transactional
     @Override
     public FullAdsDto getFullAds(long adsId) {
         return adsMapper.toFullAdsDto(findAds(adsId));
     }
 
-    /**
-     * Get all {@link AdsComment} for needed{@link Ads} from {@link AdsCommentRepository}
-     * @param adsId Id of needed Ads
-     * @return Collection of comment for needed Ads
-     */
     @Transactional
     @Override
     public ResponseWrapperCommentDto getAdsComments(long adsId) {
@@ -193,13 +139,6 @@ public class AdsServiceImpl implements AdsService {
         return responseWrapperAdsCommentMapper.toResponseWrapperCommentDto(adsCommentDtoList.size(), adsCommentDtoList);
     }
 
-    /**
-     * Create {@link AdsComment} in {@link AdsCommentRepository}
-     * @param adsId Id of needed Ads
-     * @param adsCommentDto Data for create
-     * @return Created comment
-     * @throws UserNotFoundException – if current User not found in database
-     */
     @Transactional
     @Override
     public AdsCommentDto createAdsComments(long adsId, AdsCommentDto adsCommentDto) {
@@ -212,25 +151,12 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(adsCommentRepository.save(comment));
     }
 
-    /**
-     * Get {@link AdsComment} from {@link AdsCommentRepository}
-     * @param adsId Id of needed Ads
-     * @param commentId Id of needed comment
-     * @return Needed comment
-     */
     @Transactional
     @Override
     public AdsCommentDto getAdsComment(long adsId, long commentId) {
         return adsCommentMapper.toDto(getCommentsIfPresent(adsId, commentId));
     }
 
-    /**
-     * Delete {@link AdsComment} from {@link AdsCommentRepository}
-     * @param adsId Id of needed Ads
-     * @param commentId Id of needed comment
-     * @return Deleted comment
-     * @throws ItIsNotYourCommentException if current User hasn't right for doing something with this comment
-     */
     @Transactional
     @Override
     public AdsCommentDto deleteAdsComments(long adsId, long commentId) {
@@ -241,15 +167,6 @@ public class AdsServiceImpl implements AdsService {
         return adsCommentMapper.toDto(comment);
     }
 
-    /**
-     * Update {@link AdsComment} in {@link AdsCommentRepository}
-     * @param adsId Id of needed Ads
-     * @param commentId Id of needed comment
-     * @param adsCommentDto Data for update
-     * @return Updated comment
-     * @throws NoContentException if field "text" of current Dto are empty
-     * @throws ItIsNotYourCommentException if current User hasn't right for doing something with this comment
-     */
     @Transactional
     @Override
     public AdsCommentDto updateAdsComments(long adsId, long commentId, AdsCommentDto adsCommentDto) {
@@ -272,21 +189,16 @@ public class AdsServiceImpl implements AdsService {
      * @return Converted List
      */
     @Transactional
-    public List<AdsDto> toAdsDtoList(List<Ads> ads) {
+    protected List<AdsDto> toAdsDtoList(List<Ads> ads) {
         return ads.stream()
                 .map(adsMapper::toDto)
                 .collect(Collectors.toList());
     }
-    /**
-     * Get array of byte of {@link AdsImage} from {@link AdsImageRepository}
-     * @param adsImageUUID UUID in database
-     * @return AdsImage
-     * @throws AdsImageNotFoundException if AdsImage not found in database
-     */
+
     @Transactional
     @Override
-    public byte[] getImage(UUID adsImageUUID) {
-        return adsImageRepository.findAdsImageByUuid(adsImageUUID)
+    public byte[] getImage(UUID adsImageUuid) {
+        return adsImageRepository.findAdsImageByUuid(adsImageUuid)
                 .map(AdsImage::getData)
                 .orElseThrow(AdsImageNotFoundException::new);
     }

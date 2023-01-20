@@ -110,3 +110,10 @@ ALTER TABLE IF EXISTS users_avatars
 
 ALTER TABLE IF EXISTS users_avatars
     RENAME COLUMN avatar_id TO avatar_uuid;
+
+-- changeset yukov:5
+
+INSERT INTO users (first_name, last_name, phone_number, login, password, role, reg_date, city)
+VALUES
+    ('ADMIN', 'ADMINOV', '+77777777777', 'admin@gmail.com', '{bcrypt}$2a$10$2DvMDVwM5xOt56ExukLCYOxFIdKbBkImjQFBJ5TAblYqIaL0Xaw2G', 'ADMIN', null, null),
+    ('USER', 'USEROV', '+79878885566', 'user@gmail.com', '{bcrypt}$2a$10$OKSRlOWKDk7uBaO8UoP0dOVAhuKF6GzjEYwbMuX8cTuc78kdjMS.m', 'USER', null, null);

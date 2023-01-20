@@ -22,7 +22,6 @@ import ru.skypro.homework.repository.UserAvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,85 +43,70 @@ public class UserServiceImpl implements UserService {
     @Value("userImage")
     private String userImageDir;
 
-    /**
-     * Create new {@link User} in {@link UserRepository}
-     * @param registerReq data from register form
-     * @return new UserDto
-     */
+
     @Override
     public UserDto createUser(RegisterReq registerReq) {
+        log.info("Trying to create and save new user");
         User newUser = userRepository.save(userMapper.toUser(registerReq));
+        log.info("The user with id = {} was saved ", newUser.getId());
         return userMapper.toDto(newUser);
     }
 
-    /**
-     * Get user data for current {@link User} from {@link UserRepository}
-     * @return needed data
-     */
     @Transactional
     @Override
     public UserDto getUserMe() {
         return userMapper.toDto(getUserFromAuthentication());
     }
 
-    /**
-     * Update {@link User} data in {@link UserRepository}
-     * @param userDto needed data for update User, must be {@link NotNull}
-     * @return Updated UserDto
-     * @throws NoContentException if one of fields is {@link Null}
-     */
     @Transactional
     @Override
     public UserDto updateUser(UserDto userDto) {
+        log.info("Trying to update the userDto with username = {}", userDto.getLogin());
         checkUserDtoNeededFieldsIsNotNull(userDto);
+        log.info("Trying to check that needed fields is not null ");
         User user = getUserFromAuthentication();
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhoneNumber(userDto.getPhoneNumber());
         User response = userRepository.save(user);
+        log.info("The userDto with id = {} was updated ", response.getId());
         return userMapper.toDto(response);
     }
 
-    /**
-     * Update current or create new {@link UserAvatar} in {@link UserAvatarRepository}
-     * @param file uploaded file
-     * @return Updated UserDto
-     * @throws SaveFileException if something went wrong, when image updated
-     */
     @Transactional
     @Override
     public UserDto updateUserImage(MultipartFile file) {
+        log.info("Trying to update image at the userDto");
         User user = getUserFromAuthentication();
+        log.info("The userDto is found, updating...");
         if (userAvatarRepository.findUserAvatarByUser(user).isPresent()) {
+            log.info("if avatar is found, delete it");
             userAvatarRepository.deleteUserAvatarByUser(user);
         }
         try {
             UserAvatar newUserAvatar = imageMapper.toUserAvatar(file);
             newUserAvatar.setUser(user);
             userAvatarRepository.save(newUserAvatar);
+            log.info("Avatar was updated");
         } catch (IOException e) {
+            log.warn("unable to save image");
             throw new SaveFileException();
-        }
+                    }
         return userMapper.toDto(user);
     }
 
-    /**
-     *Change current password of current {@link User} in {@link UserRepository}
-     * @param newPasswordDto needed passwords from input form
-     * @return updated password
-     * @throws PasswordsAreEqualsException if current password and new password are same
-     * @throws PasswordsAreNotEqualsException if written current password is not equal of password current User
-     */
     @Transactional
     @Override
     public NewPasswordDto setPassword(NewPasswordDto newPasswordDto) {
+        log.info("trying to set new password");
         if (newPasswordDto.getCurrentPassword().equals(newPasswordDto.getNewPassword())) {
-            throw new PasswordsAreEqualsException();
+             throw new PasswordsAreEqualsException();
         }
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         User user = getUserFromAuthentication();
         if (!encoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())) {
+            log.debug("пароли не совпадают");
             throw new PasswordsAreNotEqualsException();
         }
 
@@ -135,16 +119,10 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    /**
-     * Delete {@link User} by Id from {@link UserRepository}
-     * <br> ONLY FOR ADMIN
-     * @param id Id of User
-     * @return UserDto of removed User
-     * @throws UserNotFoundException if this User not exist in database
-     */
     @Transactional
     @Override
     public UserDto removeUser(long id) {
+        log.info("try to remove if found by id");
         User userForDelete = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
         adsRepository.deleteAllByAuthor(userForDelete);
@@ -152,12 +130,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userForDelete);
     }
 
-    /**
-     * Find {@link User} by login (ignore case) in database via method {@link UserRepository}
-     * @param login of needed User
-     * @return Founded User
-     * @throws UserNotFoundException if User not found in database
-     */
     @Transactional
     @Override
     public User getUser(String login) {
@@ -165,12 +137,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    /**
-     * Check login before create new {@link User}
-     * @param login which was written in register form
-     * @return true if all is OK
-     * @throws LoginAlreadyUsedException if this login already used
-     */
     @Transactional
     @Override
     public boolean checkUserForRegisterOk(String login) {
@@ -180,44 +146,35 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    /**
-     * Check {@link User} with needed login is existed
-     * @param login needed login
-     * @return true if user existed
-     * @throws UserNotFoundException – if needed User not found in database
-     */
     @Transactional
     @Override
     public boolean checkUserExists(String login) {
+        log.info("Try to сheck check whether the login is used or not");
         userRepository.findUserByLoginIgnoreCase(login)
                 .orElseThrow(UserNotFoundException::new);
         return true;
     }
 
-    /**
-     * Check current User is Admin
-     * @return true if User is Admin
-     */
     @Override
     public boolean isAdmin() {
+        log.info("Try to check whether the user is an administrator or not");
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("admin_full_access"));
     }
 
-    /**
-     * Get User from Authentication
-     * @return User
-     */
     @Transactional
     @Override
     public User getUserFromAuthentication() {
+        log.info("Try to get user from authentication");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getUser(authentication.getName());
     }
 
     @Override////todo delete thismethod
     public void uploadAvatar(MultipartFile file) {
+        log.info("try to upload avatar");
         User user = getUserFromAuthentication();
+        log.info("try to get user from authentication ");
         try {
             Path filePath = Path.of(userImageDir, user.getId() + "." + getExtension(file.getOriginalFilename()));
             Files.createDirectories((filePath.getParent()));
@@ -239,6 +196,7 @@ public class UserServiceImpl implements UserService {
 
     @Override//todo delete thismethod
     public byte[] downloadAvatar() {
+        log.info("try to download avatar");
         UserAvatar avatar = userAvatarRepository.findUserAvatarByUser(getUserFromAuthentication())
                 .orElseThrow(UserAvatarNotFoundException::new);
         try {
@@ -248,15 +206,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * Get array of byte of {@link UserAvatar} from {@link UserAvatarRepository}
-     * @param avatarUuid Id in database
-     * @return Avatar
-     * @throws UserAvatarNotFoundException if Avatar not found in database
-     */
     @Transactional
     @Override
     public byte[] getAvatar(UUID avatarUuid) {
+        log.info("Try to find avatar by Uuid");
         return userAvatarRepository.findUserAvatarByAvatarUuid(avatarUuid)
                 .map(UserAvatar::getData)
                 .orElseThrow(UserAvatarNotFoundException::new);

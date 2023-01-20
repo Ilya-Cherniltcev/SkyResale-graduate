@@ -2,6 +2,7 @@ package ru.skypro.homework.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import ru.skypro.homework.model.Role;
 
 import javax.validation.constraints.*;
 

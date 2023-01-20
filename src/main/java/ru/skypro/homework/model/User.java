@@ -44,9 +44,10 @@ public class User {
     private String regDate;
     @Column(name = "city")
     private String city;
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private String role;
-    @OneToOne (fetch = FetchType.LAZY, mappedBy = "user")
+    private Role role;
+    @OneToOne (fetch = FetchType.LAZY, mappedBy = "user",cascade = CascadeType.ALL)
     @JsonIgnore
     @JoinColumn(name = "avatar")
     private UserAvatar userAvatar;

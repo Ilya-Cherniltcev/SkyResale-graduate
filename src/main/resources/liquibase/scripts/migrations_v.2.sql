@@ -83,7 +83,7 @@ ALTER TABLE IF EXISTS users_avatars
 ALTER TABLE IF EXISTS users_avatars
     ALTER COLUMN avatar_id SET DATA TYPE BIGINT;
 
--- changeset yukov:2
+-- changeset yukov:3
 
 ALTER TABLE IF EXISTS users
     ADD COLUMN reg_date  VARCHAR(255);
@@ -91,3 +91,29 @@ ALTER TABLE IF EXISTS users
 ALTER TABLE IF EXISTS users
     ADD COLUMN city  VARCHAR(255);
 
+-- changeset yukov:4
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+ALTER TABLE IF EXISTS ads_image
+    ALTER COLUMN ads_image_id DROP DEFAULT,
+    ALTER COLUMN ads_image_id SET DATA TYPE UUID USING (uuid_generate_v4()),
+    ALTER COLUMN ads_image_id SET DEFAULT uuid_generate_v4();
+
+ALTER TABLE IF EXISTS ads_image
+    RENAME COLUMN ads_image_id TO ads_image_uuid;
+
+ALTER TABLE IF EXISTS users_avatars
+    ALTER COLUMN avatar_id DROP DEFAULT,
+    ALTER COLUMN avatar_id SET DATA TYPE UUID USING (uuid_generate_v4()),
+    ALTER COLUMN avatar_id SET DEFAULT uuid_generate_v4();
+
+ALTER TABLE IF EXISTS users_avatars
+    RENAME COLUMN avatar_id TO avatar_uuid;
+
+-- changeset yukov:5
+
+INSERT INTO users (first_name, last_name, phone_number, login, password, role, reg_date, city)
+VALUES
+    ('ADMIN', 'ADMINOV', '+77777777777', 'admin@gmail.com', '{bcrypt}$2a$10$2DvMDVwM5xOt56ExukLCYOxFIdKbBkImjQFBJ5TAblYqIaL0Xaw2G', 'ADMIN', null, null),
+    ('USER', 'USEROV', '+79878885566', 'user@gmail.com', '{bcrypt}$2a$10$OKSRlOWKDk7uBaO8UoP0dOVAhuKF6GzjEYwbMuX8cTuc78kdjMS.m', 'USER', null, null);

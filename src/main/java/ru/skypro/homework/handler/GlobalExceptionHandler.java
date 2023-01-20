@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AdsImageNotFoundException.class)
     public ResponseEntity<String> adsImageNotFoundExceptionHandler(AdsImageNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Изображение для объявления не найдена");
+                .body("Изображение для объявления не найдено");
     }
     @ExceptionHandler(UserAvatarNotFoundException.class)
     public ResponseEntity<String> userAvatarNotFoundExceptionHandler(UserAvatarNotFoundException e) {
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(NoContentException.class)
     public ResponseEntity<String> noContentExceptionHandler(NoContentException e) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Нет необходимых данных");
     }
     @ExceptionHandler(LoginAlreadyUsedException.class)

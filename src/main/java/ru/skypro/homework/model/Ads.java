@@ -37,14 +37,14 @@ public class    Ads {
     @Column(name = "ads_description")
     private String description;
 
-    @OneToMany (fetch = FetchType.LAZY, mappedBy = "ads")
+    @OneToMany (fetch = FetchType.LAZY, mappedBy = "ads",cascade = CascadeType.REMOVE)
     @JsonIgnore
     private List<AdsImage> image;
 
     @Column(name = "ads_price")
     private Long price;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "ads")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "ads", cascade = CascadeType.REMOVE)
     @JsonIgnore
     @ToString.Exclude
     private Collection<AdsComment> adsComments;

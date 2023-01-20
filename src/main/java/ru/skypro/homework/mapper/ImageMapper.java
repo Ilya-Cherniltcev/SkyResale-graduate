@@ -10,13 +10,13 @@ import java.io.IOException;
 
 @Mapper
 public interface ImageMapper {
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "uuid", ignore = true)
     @Mapping(target = "filesize", source = "file.size")
     @Mapping(target = "mediaType", source = "file.contentType")
     @Mapping(target = "data", source = "file.bytes")
     AdsImage toAdsImage(MultipartFile file) throws IOException;
 
-    @Mapping(target = "avatarId", ignore = true)
+    @Mapping(target = "avatarUuid", ignore = true)
     @Mapping(target = "filesize", source = "file.size")
     @Mapping(target = "mediaType", source = "file.contentType")
     @Mapping(target = "data", source = "file.bytes")

@@ -18,8 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.skypro.homework.controller.UserController;
-import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.RegisterReq;
+
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.User;
@@ -65,6 +64,7 @@ class UserControllerTest {
     private AdsCommentRepository adsCommentRepository;
 
 
+
     @Autowired
     UserControllerTest(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
@@ -72,41 +72,14 @@ class UserControllerTest {
     }
 
     @BeforeEach
-    void setUp() {
-        user.setId(DEFAULT_USER_ID);
-        user.setLogin(DEFAULT_USERNAME);
-        user.setFirstName(DEFAULT_FIRSTNAME);
-        user.setLastName(DEFAULT_LASTNAME);
-        user.setPhoneNumber(DEFAULT_PHONE);
 
-        userDto.setUserId(DEFAULT_USER_ID);
-        userDto.setLogin(DEFAULT_USERNAME);
-        userDto.setFirstName(DEFAULT_FIRSTNAME);
-        userDto.setLastName(DEFAULT_LASTNAME);
-        userDto.setPhoneNumber(DEFAULT_PHONE);
-
-        userAvatarEntity.setId(DEFAULT_USER_ID);
-        userAvatarEntity.setLogin(DEFAULT_USERNAME);
-        userAvatarEntity.setFirstName(DEFAULT_FIRSTNAME);
-        userAvatarEntity.setLastName(DEFAULT_LASTNAME);
-        userAvatarEntity.setPhoneNumber(DEFAULT_PHONE);
-    }
-
-    @Test
-    void testUpdateUser() throws Exception {
-        when(userService.updateUser(any()))
-                .thenReturn(userDto);
-        when(userMapper.toUser(any(RegisterReq.class)))
-                .thenReturn(user);
-        when(userMapper.toDto(any(User.class)))
-                .thenReturn(userDto);
-        userDto.setPhoneNumber(UPDATED_PHONE);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .patch("/users/me")
                         .content(objectMapper.writeValueAsString(userDto))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
+
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(user.getLogin()))
@@ -135,6 +108,20 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.newPassword")
                         .value(passwordDto.getNewPassword()));
     }
+=======
+                .andExpect(status().isOk());
+//                .andExpect(jsonPath("$.login").value(createUserDto.getLogin()))
+//                .andExpect(jsonPath("$.password").value(createUserDto.getPassword()))
+//                .andExpect(jsonPath("$.firstName").value(createUserDto.getFirstName()))
+//                .andExpect(jsonPath("$.lastName").value(createUserDto.getLastName()))
+//                .andExpect(jsonPath("$.phoneNumber").value(createUserDto.getPhoneNumber()));
+    }
+
+    @Test
+    void updateUser() throws Exception {
+//        when(userRepository.save(userMapper.toUser(createUserDto)))
+//                .thenReturn(user);
+
 
     @Test
     void testGetUser() throws Exception {

@@ -14,6 +14,8 @@ public class ConstantsForTests {
 
     public static final String DEFAULT_LOGIN = "user@gmail.com";
     public static final String DEFAULT_PASSWORD = "password";
+    public static final String ENCRYPTED_PASSWORD =
+            "{bcrypt}$2a$10$YEyX.yAuIE8MiuOjF63xTe6LDSkbrLXdc.Dz4JteJHHe6uSkfvJPO";
     public static final Long DEFAULT_USER_ID = 1L;
     public static final String DEFAULT_USERNAME = DEFAULT_LOGIN;
     public static final String DEFAULT_FIRSTNAME = "JOHN";

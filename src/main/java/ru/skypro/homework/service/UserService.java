@@ -108,10 +108,6 @@ public interface UserService {
      */
     User getUserFromAuthentication();
 
-    void uploadAvatar(MultipartFile file);
-
-    byte[] downloadAvatar();
-
     /**
      * Get array of byte of {@link UserAvatar} from {@link UserAvatarRepository}
      *

@@ -2,8 +2,6 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -24,9 +22,6 @@ import ru.skypro.homework.service.UserService;
 
 import javax.validation.constraints.Null;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Slf4j
@@ -39,10 +34,6 @@ public class UserServiceImpl implements UserService {
     private final UserAvatarRepository userAvatarRepository;
     private final UserMapper userMapper;
     private final ImageMapper imageMapper;
-
-    @Value("userImage")
-    private String userImageDir;
-
 
     @Override
     public UserDto createUser(RegisterReq registerReq) {
@@ -149,7 +140,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public boolean checkUserExists(String login) {
-        log.info("Try to сheck check whether the login is used or not");
+        log.info("Try to check whether the login is used or not");
         userRepository.findUserByLoginIgnoreCase(login)
                 .orElseThrow(UserNotFoundException::new);
         return true;
@@ -170,42 +161,6 @@ public class UserServiceImpl implements UserService {
         return getUser(authentication.getName());
     }
 
-    @Override////todo delete thismethod
-    public void uploadAvatar(MultipartFile file) {
-        log.info("try to upload avatar");
-        User user = getUserFromAuthentication();
-        log.info("try to get user from authentication ");
-        try {
-            Path filePath = Path.of(userImageDir, user.getId() + "." + getExtension(file.getOriginalFilename()));
-            Files.createDirectories((filePath.getParent()));
-            Files.deleteIfExists(filePath);
-            Files.write(filePath, file.getBytes());
-
-            UserAvatar userAvatar = userAvatarRepository.findUserAvatarByUser(user)
-                    .orElse(new UserAvatar());
-            userAvatar.setFilePath(filePath.toString());
-            userAvatar.setFilesize(file.getSize());
-            userAvatar.setMediaType(file.getContentType());
-            userAvatar.setData(file.getBytes());
-            userAvatar.setUser(user);
-            userAvatarRepository.save(userAvatar);
-        } catch (IOException e) {
-            throw new SaveFileException();
-        }
-    }
-
-    @Override//todo delete thismethod
-    public byte[] downloadAvatar() {
-        log.info("try to download avatar");
-        UserAvatar avatar = userAvatarRepository.findUserAvatarByUser(getUserFromAuthentication())
-                .orElseThrow(UserAvatarNotFoundException::new);
-        try {
-            return Files.readAllBytes(Paths.get(avatar.getFilePath()));
-        } catch (IOException e) {
-            throw new ReadFileException();
-        }
-    }
-
     @Transactional
     @Override
     public byte[] getAvatar(UUID avatarUuid) {
@@ -213,15 +168,6 @@ public class UserServiceImpl implements UserService {
         return userAvatarRepository.findUserAvatarByAvatarUuid(avatarUuid)
                 .map(UserAvatar::getData)
                 .orElseThrow(UserAvatarNotFoundException::new);
-    }
-
-    //todo delete thismethod
-    private String getExtension(String originalFileName) {
-        String extension = StringUtils.substringAfter(originalFileName, ".");
-        if (!originalFileName.contains(".") || extension.isBlank() || extension.contains(".")) {
-            throw new RuntimeException();
-        }
-        return extension;
     }
 
     /**

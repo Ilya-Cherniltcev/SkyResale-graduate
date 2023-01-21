@@ -1,9 +1,13 @@
 package ru.skypro.homework.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -12,22 +16,18 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import ru.skypro.homework.controller.UserController;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.ResponseWrapperAdsDto;
-import ru.skypro.homework.dto.ResponseWrapperCommentDto;
-import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.controller.AdsController;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mapper.*;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
 import ru.skypro.homework.model.AdsImage;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.*;
-import ru.skypro.homework.service.UserService;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 import ru.skypro.homework.service.impl.AuthServiceImpl;
 import ru.skypro.homework.service.impl.UserServiceImpl;
@@ -37,25 +37,31 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skypro.homework.ConstantsForTests.*;
 
-@WebMvcTest(AdsControllerTest.class)
+@WebMvcTest(AdsController.class)
+@ExtendWith(SpringExtension.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class AdsControllerTest {
     Ads ads = new Ads();
     Ads updateAds = new Ads();
     AdsDto adsDto = new AdsDto();
+    CreateAdsDto createAdsDto = new CreateAdsDto();
     AdsDto updateAdsDto = new AdsDto();
     JSONObject jsonObject = new JSONObject();
     @Autowired
     private WebApplicationContext webApplicationContext;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private MockMvc mockMvc;
     @SpyBean
     private AdsServiceImpl adsService;
-    @SpyBean
+    @MockBean
     private AuthServiceImpl authService;
     @MockBean
     AdsCommentRepository adsCommentRepository;
@@ -67,11 +73,9 @@ public class AdsControllerTest {
     AdsCommentMapper adsCommentMapper;
     @MockBean
     AdsMapper adsMapper;
-//    @MockBean
-//    ResponseWrapperAdsDto responseWrapperAdsDto;
     @MockBean
     ResponseWrapperAdsMapper responseWrapperAdsMapper;
-     @MockBean
+    @MockBean
     ResponseWrapperCommentMapper responseWrapperCommentMapper;
     @MockBean
     ResponseWrapperCommentDto responseWrapperCommentDto;
@@ -85,11 +89,12 @@ public class AdsControllerTest {
     @MockBean
     PasswordEncoder passwordEncoder;
     @MockBean
-    UserService userService;
+    UserServiceImpl userService;
     User user = new User();
-    AdsImage adsImage= new AdsImage();
+    FullAdsDto fullAdsDto = new FullAdsDto();
+    AdsImage adsImage = new AdsImage();
     AdsComment adsComment = new AdsComment();
-    UUID uuid = new UUID(1,1);
+    UUID uuid = new UUID(1, 1);
     List<Ads> adsList;
     List<AdsDto> adsDtoList;
     List<AdsImage> adsImageList;
@@ -98,7 +103,6 @@ public class AdsControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         user.setId(DEFAULT_USER_ID);
         user.setLogin(DEFAULT_USERNAME);
@@ -137,40 +141,32 @@ public class AdsControllerTest {
 
         adsDtoList = List.of(adsDto);
 
+        createAdsDto.setTitle(DEFAULT_ADS_TITLE);
+        createAdsDto.setPrice(DEFAULT_ADS_PRICE);
+        createAdsDto.setDescription(DEFAULT_ADS_DESCRIPTION);
+
         responseWrapperAdsDto.setCount(1);
         responseWrapperAdsDto.setResults(adsDtoList);
 
-//        updatedUser.setId(DEFAULT_USER_ID);
-//        updatedUser.setLogin(DEFAULT_USERNAME);
-//        updatedUser.setFirstName(UPDATED_FIRSTNAME);
-//        updatedUser.setLastName(DEFAULT_LASTNAME);
-//        updatedUser.setPhoneNumber(UPDATED_PHONE);
-//
-//        userDto.setUserId(DEFAULT_USER_ID);
-//        userDto.setLogin(DEFAULT_USERNAME);
-//        userDto.setFirstName(DEFAULT_FIRSTNAME);
-//        userDto.setLastName(DEFAULT_LASTNAME);
-//        userDto.setPhoneNumber(DEFAULT_PHONE);
-//
-//        updatedUserDto.setUserId(DEFAULT_USER_ID);
-//        updatedUserDto.setLogin(DEFAULT_USERNAME);
-//        updatedUserDto.setFirstName(UPDATED_FIRSTNAME);
-//        updatedUserDto.setLastName(DEFAULT_LASTNAME);
-//        updatedUserDto.setPhoneNumber(UPDATED_PHONE);
-// -----------
-        jsonObject.put("id", DEFAULT_USER_ID);
-        jsonObject.put("login", DEFAULT_USERNAME);
-        jsonObject.put("firstName", UPDATED_FIRSTNAME);
+        fullAdsDto.setPk(DEFAULT_ADS_ID);
+        fullAdsDto.setDescription(DEFAULT_ADS_DESCRIPTION);
+        fullAdsDto.setTitle(DEFAULT_ADS_TITLE);
+        fullAdsDto.setPrice(DEFAULT_ADS_PRICE);
+        fullAdsDto.setImage(DEFAULT_ADS_DTO_IMAGE_ARRAY);
+
+        jsonObject.put("count", 1);
+        jsonObject.put("pk", DEFAULT_ADS_ID);
+        jsonObject.put("title", DEFAULT_ADS_TITLE);
+        jsonObject.put("price", DEFAULT_ADS_PRICE);
     }
 
-    @WithMockUser(username = DEFAULT_USERNAME, authorities = "ADMIN")
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
     @Test
     void testGetAllAds() throws Exception {
-        when(authentication.getName()).thenReturn(DEFAULT_USERNAME);
-        when(adsRepository.findAll()).thenReturn(adsList);
-        when(responseWrapperAdsMapper.toResponseWrapperAdsDto(1,adsDtoList))
+        when(adsRepository.findAll())
+                .thenReturn(adsList);
+        when(responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList))
                 .thenReturn(responseWrapperAdsDto);
-
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/ads")
                         .content(jsonObject.toJSONString())
@@ -178,8 +174,75 @@ public class AdsControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
-//                .andExpect(jsonPath("$.title").value(DEFAULT_ADS_TITLE))
-//                .andExpect(jsonPath("$.price").value(DEFAULT_ADS_PRICE));
-        }
+    }
 
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
+    @Test
+    public void testDeleteAds() throws Exception {
+        when(userService.getUserFromAuthentication())
+                .thenReturn(user);
+        when(adsRepository.findAdsById(any())).thenReturn(Optional.ofNullable(ads));
+        doNothing().when(adsRepository).deleteById(any());
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/ads/{adsId}", ads.getId())
+                        .content(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
+    @Test
+    public void testGetFullAds() throws Exception {
+        when(adsRepository.findAdsById(any())).thenReturn(Optional.ofNullable(ads));
+        when(adsMapper.toFullAdsDto(ads)).thenReturn(fullAdsDto);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/{adsId}", ads.getId())
+                        .content(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
+    @Test
+    public void testGetAdsMe() throws Exception {
+        when(adsRepository.findAll()).thenReturn(adsList);
+        when(responseWrapperAdsMapper.toResponseWrapperAdsDto(adsDtoList.size(), adsDtoList))
+                .thenReturn(responseWrapperAdsDto);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/me")
+                        .content(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
+    @Disabled
+    public void testAddAds() throws Exception {
+        when(userService.getUserFromAuthentication()).thenReturn(user);
+        when(adsRepository.save(any())).thenReturn(ads);
+        when(adsMapper.toDto(any())).thenReturn(adsDto);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/ads")
+                      //  .queryParam("properties", String.valueOf(createAdsDto))
+                        .content(MediaType.MULTIPART_FORM_DATA_VALUE)
+                        .accept(MediaType.MULTIPART_FORM_DATA))
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
+    @WithMockUser(username = DEFAULT_USERNAME, authorities = "USER")
+    @Disabled
+    public void testUpdateAds() throws Exception {
+        when(adsRepository.findAdsById(any())).thenReturn(Optional.ofNullable(ads));
+        when(adsMapper.updAds(createAdsDto,ads)).thenReturn(ads);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .patch("/ads/{adsId}", ads.getId())
+                        .content(objectMapper.writeValueAsString(createAdsDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

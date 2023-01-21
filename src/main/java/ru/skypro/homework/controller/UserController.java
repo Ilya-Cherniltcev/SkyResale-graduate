@@ -181,7 +181,6 @@ public class UserController {
             )
     })
     @GetMapping("/image/{avatarUuid}")
-//    @PreAuthorize("hasAuthority('user_basic_access')")
     public ResponseEntity<byte[]> getImage(@PathVariable UUID avatarUuid) {
         return new ResponseEntity<>(userService.getAvatar(avatarUuid), HttpStatus.OK);
     }
